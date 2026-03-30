@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cloud Network Effort Calculator</title>
+  <title>Cloud Network Effort Estimator</title>
     <style>
     :root{
       --brand:#FF452E;
@@ -69,9 +69,9 @@
 <body>
   <div class="page">
     <section class="hero">
-      <h1>Cloud Network Effort Calculator</h1>
+      <h1>Cloud Network Effort Estimator</h1>
       <p>
-        Spreadsheet-style calculator for discovery, design, testing, implementation, and hypercare effort.
+        Spreadsheet-style Estimator for discovery, design, testing, implementation, and hypercare effort.
         It includes full project inputs, automatic recalculation, validation, implementation breakdown, and export to Excel or PDF.
       </p>
     </section>
@@ -79,7 +79,7 @@
     <div class="layout">
       <section class="panel no-print">
         <h2 class="section-title">Project Inputs</h2>
-        <div class="subtle">Update any value and the calculator refreshes automatically.</div>
+        <div class="subtle">Update any value and the Estimator refreshes automatically.</div>
 
         <h3 class="group-title">Core Topology</h3>
         <div class="grid">
@@ -192,7 +192,7 @@
       <section class="panel">
         <div class="results-head">
           <div>
-            <h2 class="section-title" style="margin-bottom:0;">Effort Calculator Summary</h2>
+            <h2 class="section-title" style="margin-bottom:0;">Effort Estimator Summary</h2>
             <p>
               Project size is driven by VNets, regions, cloud firewalls, and transit hubs.
               Baseline uplift is applied only to discovery, design, and testing. Implementation is calculated component-wise.
@@ -306,7 +306,7 @@
         </div>
 
         <div class="footnote print-only" style="margin-top:18px;">
-          Exported from Cloud Network Effort Calculator.
+          Exported from Cloud Network Effort Estimator.
         </div>
         <div class="footnote" id="formulaNote">
           Baseline reference: Small 24/48/16, Medium 44/100/40, Large 80/180/80. Hypercare is 4% of implementation.
@@ -642,7 +642,7 @@
         String(now.getMinutes()).padStart(2, '0');
 
       const inputRows = [
-        ['Cloud Network Effort Calculator Export'],
+        ['Cloud Network Effort Estimator Export'],
         ['Generated', timestamp],
         [],
         ['Project Inputs'],
@@ -666,7 +666,7 @@
       ];
 
       const summaryRows = [
-        ['Effort Calculator Summary'],
+        ['Effort Estimator Summary'],
         ['Generated', timestamp],
         ['Project Size', result.sizeInfo.size],
         ['Score', result.sizeInfo.score],
