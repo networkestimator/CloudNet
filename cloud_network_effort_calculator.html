@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cloud Network Effort Calculator</title>
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --card: #ffffff;
+      --line: #d8dee9;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --accent: #2563eb;
+      --accent-dark: #1d4ed8;
+      --accent-soft: #dbeafe;
+      --success: #047857;
+      --danger: #b91c1c;
+      --danger-soft: #fee2e2;
+      --header: #eef2f7;
+      --shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+    }
+
+    .page {
+      max-width: 1380px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .hero,
+    .panel,
+    .table-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      padding: 24px;
+      margin-bottom: 18px;
+    }
+
+    .hero h1 {
+      margin: 0 0 8px;
+      font-size: 32px;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 980px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1.08fr 1.32fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel { padding: 20px; }
+
+    .section-title {
+      margin: 0 0 14px;
+      font-size: 20px;
+    }
+
+    .subtle {
+      color: var(--muted);
+      font-size: 14px;
+      margin-top: -4px;
+      margin-bottom: 16px;
+    }
+
+    .group-title {
+      font-size: 16px;
+      margin: 20px 0 12px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 14px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field.full { grid-column: 1 / -1; }
+
+    .field label {
+      font-size: 13px;
+      font-weight: bold;
+      color: #334155;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 11px 12px;
+      font-size: 14px;
+      background: #fff;
+      color: var(--text);
+    }
+
+    .field input:focus,
+    .field select:focus {
+      outline: 2px solid var(--accent-soft);
+      border-color: var(--accent);
+    }
+
+    .field input.invalid,
+    .field select.invalid {
+      border-color: var(--danger);
+      background: #fff8f8;
+    }
+
+    .helper {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 11px 16px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    button.primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    button.primary:hover { background: var(--accent-dark); }
+
+    button.secondary {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    button.secondary:hover { background: #d5dde8; }
+
+    button.outline {
+      background: #fff;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
+
+    button.outline:hover { background: #eff6ff; }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .message {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-size: 14px;
+      display: none;
+    }
+
+    .message.error {
+      background: var(--danger-soft);
+      color: var(--danger);
+      border: 1px solid #fecaca;
+    }
+
+    .message.info {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+    }
+
+    .results-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: start;
+      margin-bottom: 16px;
+    }
+
+    .results-head p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      max-width: 650px;
+    }
+
+    .meta {
+      text-align: right;
+      font-size: 13px;
+      color: var(--muted);
+      min-width: 210px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .stack {
+      display: grid;
+      gap: 16px;
+    }
+
+    .table-card { overflow: hidden; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    thead th {
+      background: var(--header);
+      padding: 12px 10px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      font-size: 13px;
+    }
+
+    tbody td {
+      padding: 11px 10px;
+      border-bottom: 1px solid #e5e7eb;
+      vertical-align: top;
+    }
+
+    tbody tr.total-row td {
+      font-weight: bold;
+      background: #f8fafc;
+    }
+
+    .right { text-align: right; }
+
+    .footnote {
+      margin-top: 14px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .print-only { display: none; }
+
+    @media (max-width: 1120px) {
+      .layout { grid-template-columns: 1fr; }
+      .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 720px) {
+      .page { padding: 14px; }
+      .hero h1 { font-size: 26px; }
+      .grid,
+      .cards { grid-template-columns: 1fr; }
+      .results-head { flex-direction: column; }
+      .meta { text-align: left; min-width: 0; }
+      table { font-size: 13px; }
+    }
+
+    @media print {
+      body { background: #fff; }
+      .page { max-width: none; padding: 0; }
+      .no-print { display: none !important; }
+      .print-only { display: block; }
+      .hero, .panel, .table-card {
+        box-shadow: none;
+        border-radius: 0;
+      }
+      .layout { display: block; }
+      .panel { border: none; padding: 0 0 16px; }
+      .table-card { border: 1px solid #bfc7d4; }
+      button { display: none !important; }
+      a { text-decoration: none; color: inherit; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="hero">
+      <h1>Cloud Network Effort Calculator</h1>
+      <p>
+        Spreadsheet-style calculator for discovery, design, testing, implementation, and hypercare effort.
+        It includes full project inputs, automatic recalculation, validation, implementation breakdown, and export to Excel or PDF.
+      </p>
+    </section>
+
+    <div class="layout">
+      <section class="panel no-print">
+        <h2 class="section-title">Project Inputs</h2>
+        <div class="subtle">Update any value and the calculator refreshes automatically.</div>
+
+        <h3 class="group-title">Core Topology</h3>
+        <div class="grid">
+          <div class="field">
+            <label for="vnets">Number of Virtual Networks (VNet / VPC)</label>
+            <input id="vnets" type="number" min="0" step="1" value="0" />
+          </div>
+          <div class="field">
+            <label for="regions">Number of Regions</label>
+            <input id="regions" type="number" min="0" step="1" value="0" />
+          </div>
+          <div class="field">
+            <label for="cloudFirewalls">Number of Cloud Network Firewalls</label>
+            <input id="cloudFirewalls" type="number" min="0" step="1" value="0" />
+          </div>
+          <div class="field">
+            <label for="connectivity">Number of Dedicated Cloud Connectivity</label>
+            <input id="connectivity" type="number" min="0" step="1" value="0" />
+          </div>
+          <div class="field">
+            <label for="transitHubs">Number of Cloud Transit / Network Hubs</label>
+            <input id="transitHubs" type="number" min="0" step="1" value="0" />
+          </div>
+          <div class="field">
+            <label for="crossRegionLinks">Number of Cross-Region Connectivity Links</label>
+            <input id="crossRegionLinks" type="number" min="0" step="1" value="0" />
+          </div>
+          <div class="field">
+            <label for="environments">Number of Environments</label>
+            <input id="environments" type="number" min="1" step="1" value="1" />
+            <div class="helper">Environment uplift starts from the second environment.</div>
+          </div>
+          <div class="field">
+            <label for="cloudPlatforms">Number of Cloud Platforms</label>
+            <input id="cloudPlatforms" type="number" min="1" step="1" value="1" />
+          </div>
+        </div>
+
+        <h3 class="group-title">Security &amp; Connectivity Services</h3>
+        <div class="grid">
+          <div class="field">
+            <label for="waf">Number of Web Application Firewalls (WAF)</label>
+            <input id="waf" type="number" min="0" step="1" value="0" />
+          </div>
+          <div class="field">
+            <label for="vpn">Number of Site-to-Site VPN Connections</label>
+            <input id="vpn" type="number" min="0" step="1" value="0" />
+          </div>
+          <div class="field">
+            <label for="firewallHa">Firewall High Availability Required</label>
+            <select id="firewallHa">
+              <option value="No">No</option>
+              <option value="Yes">Yes</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="ddos">DDoS Protection Service Enabled</label>
+            <select id="ddos">
+              <option value="No">No</option>
+              <option value="Yes">Yes</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="hubSpoke">Hub-and-Spoke Architecture Deployment Required</label>
+            <select id="hubSpoke">
+              <option value="No">No</option>
+              <option value="Yes">Yes</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="automation">Automation / IaC Required</label>
+            <select id="automation">
+              <option value="No">No</option>
+              <option value="Yes">Yes</option>
+            </select>
+          </div>
+        </div>
+
+        <h3 class="group-title">Application Edge Services</h3>
+        <div class="grid">
+          <div class="field">
+            <label for="loadBalancers">Number of Layer 4 Load Balancers</label>
+            <input id="loadBalancers" type="number" min="0" step="1" value="0" />
+          </div>
+          <div class="field">
+            <label for="natGateways">Number of Outbound NAT Gateways</label>
+            <input id="natGateways" type="number" min="0" step="1" value="0" />
+          </div>
+          <div class="field full">
+            <label for="deploymentModel">Deployment Model</label>
+            <select id="deploymentModel">
+              <option value="Single-Cloud">Single-Cloud</option>
+              <option value="Multi-Cloud">Multi-Cloud</option>
+            </select>
+            <div class="helper">Used for scenario labeling. Multi-cloud uplift is driven by the Number of Cloud Platforms.</div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button class="secondary" id="loadSample">Load Sample Values</button>
+          <button class="secondary" id="resetForm">Reset</button>
+          <button class="outline" id="exportExcel">Export to Excel</button>
+          <button class="primary" id="printPdf">Print / Save PDF</button>
+        </div>
+
+        <div class="message error" id="validationMsg"></div>
+        <div class="message info" id="actionMsg"></div>
+      </section>
+
+      <section class="panel">
+        <div class="results-head">
+          <div>
+            <h2 class="section-title" style="margin-bottom:0;">Effort Calculator Summary</h2>
+            <p>
+              Project size is driven by VNets, regions, cloud firewalls, and transit hubs.
+              Baseline uplift is applied only to discovery, design, and testing. Implementation is calculated component-wise.
+            </p>
+          </div>
+          <div class="meta" id="scenarioText">
+            Deployment: Single-Cloud<br />
+            Platforms: 1<br />
+            Environments: 1
+          </div>
+        </div>
+
+        <div class="cards">
+          <div class="stat">
+            <div class="stat-label">Project Size</div>
+            <div class="stat-value" id="projectSize">Small</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Total Uplift</div>
+            <div class="stat-value" id="totalUpliftCard">0%</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Implementation Total</div>
+            <div class="stat-value" id="implementationTotalCard">0</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Total Engineering Effort</div>
+            <div class="stat-value" id="totalEngineering">0</div>
+          </div>
+        </div>
+
+        <div class="stack">
+          <div class="table-card">
+            <table id="summaryTable">
+              <thead>
+                <tr>
+                  <th>Phase</th>
+                  <th class="right">Total Hours</th>
+                  <th class="right">Architect %</th>
+                  <th class="right">Architect Hours</th>
+                  <th class="right">SME %</th>
+                  <th class="right">SME Hours</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Discovery</td>
+                  <td class="right" id="discoveryHours">0</td>
+                  <td class="right">0.3</td>
+                  <td class="right" id="discoveryArch">0</td>
+                  <td class="right">0.7</td>
+                  <td class="right" id="discoverySme">0</td>
+                </tr>
+                <tr>
+                  <td>Design</td>
+                  <td class="right" id="designHours">0</td>
+                  <td class="right">0.7</td>
+                  <td class="right" id="designArch">0</td>
+                  <td class="right">0.3</td>
+                  <td class="right" id="designSme">0</td>
+                </tr>
+                <tr>
+                  <td>Testing</td>
+                  <td class="right" id="testingHours">0</td>
+                  <td class="right">0.3</td>
+                  <td class="right" id="testingArch">0</td>
+                  <td class="right">0.7</td>
+                  <td class="right" id="testingSme">0</td>
+                </tr>
+                <tr>
+                  <td>Implementation</td>
+                  <td class="right" id="implementationHours">0</td>
+                  <td class="right">0.3</td>
+                  <td class="right" id="implementationArch">0</td>
+                  <td class="right">0.7</td>
+                  <td class="right" id="implementationSme">0</td>
+                </tr>
+                <tr>
+                  <td>Hypercare</td>
+                  <td class="right" id="hypercareHours">0</td>
+                  <td class="right">0.3</td>
+                  <td class="right" id="hypercareArch">0</td>
+                  <td class="right">0.7</td>
+                  <td class="right" id="hypercareSme">0</td>
+                </tr>
+                <tr class="total-row">
+                  <td>Total Architect Hours</td>
+                  <td class="right" colspan="5" id="totalArchitectHours">0</td>
+                </tr>
+                <tr class="total-row">
+                  <td>Total SME Hours</td>
+                  <td class="right" colspan="5" id="totalSmeHours">0</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="table-card">
+            <table id="implementationTable">
+              <thead>
+                <tr>
+                  <th>Implementation Breakdown</th>
+                  <th class="right">Qty</th>
+                  <th class="right">Hours / Unit</th>
+                  <th class="right">Total Hours</th>
+                </tr>
+              </thead>
+              <tbody id="implementationBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="footnote print-only" style="margin-top:18px;">
+          Exported from Cloud Network Effort Calculator.
+        </div>
+        <div class="footnote" id="formulaNote">
+          Baseline reference: Small 24/48/16, Medium 44/100/40, Large 80/180/80. Hypercare is 4% of implementation.
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const assumptions = {
+      base: {
+        Small: { discovery: 24, design: 48, testing: 16 },
+        Medium: { discovery: 44, design: 100, testing: 40 },
+        Large: { discovery: 80, design: 180, testing: 80 }
+      },
+      implementationRates: [
+        { key: 'vnets', label: 'Virtual Network (VNet / VPC)', hours: 20, qty: (i) => i.vnets },
+        { key: 'subnets', label: 'Subnet', hours: 20, qty: (i) => i.vnets * 4 },
+        { key: 'peering', label: 'Network Peering', hours: 20, qty: (i) => Math.max(i.vnets - 1, 0) },
+        { key: 'vpn', label: 'Site-to-Site VPN', hours: 20, qty: (i) => i.vpn },
+        { key: 'connectivity', label: 'Dedicated Cloud Connectivity', hours: 20, qty: (i) => i.connectivity },
+        { key: 'cloudFirewalls', label: 'Cloud Network Firewall', hours: 24, qty: (i) => i.cloudFirewalls },
+        { key: 'firewallHa', label: 'Firewall HA', hours: 12, qty: (i) => i.firewallHa === 'Yes' ? i.cloudFirewalls : 0 },
+        { key: 'transitHubs', label: 'Cloud Transit Hub', hours: 20, qty: (i) => i.transitHubs },
+        { key: 'transitAttachment', label: 'Transit Attachment', hours: 500, qty: (i) => Math.max(i.vnets - 1, 0) },
+        { key: 'crossRegionLinks', label: 'Cross-Region Connectivity', hours: 6, qty: (i) => i.crossRegionLinks },
+        { key: 'securityPolicies', label: 'Security Policies (L3/L4)', hours: 3, qty: (i) => i.vnets * 2 },
+        { key: 'routeTables', label: 'Custom Route Tables', hours: 3, qty: (i) => i.vnets },
+        { key: 'hubSpoke', label: 'Hub-Spoke Deployment', hours: 20, qty: (i) => i.hubSpoke === 'Yes' ? 1 : 0 },
+        { key: 'waf', label: 'Web Application Firewall', hours: 12, qty: (i) => i.waf },
+        { key: 'loadBalancers', label: 'Load Balancer', hours: 8, qty: (i) => i.loadBalancers },
+        { key: 'natGateways', label: 'NAT Gateway', hours: 6, qty: (i) => i.natGateways },
+        { key: 'ddos', label: 'DDoS Protection', hours: 6, qty: (i) => i.ddos === 'Yes' ? 1 : 0 }
+      ],
+      roleSplit: {
+        discovery: { arch: 0.3, sme: 0.7 },
+        design: { arch: 0.7, sme: 0.3 },
+        testing: { arch: 0.3, sme: 0.7 },
+        implementation: { arch: 0.3, sme: 0.7 },
+        hypercare: { arch: 0.3, sme: 0.7 }
+      },
+      hypercarePct: 0.04
+    };
+
+    const numericIds = [
+      'vnets', 'regions', 'cloudFirewalls', 'connectivity', 'transitHubs', 'waf', 'vpn',
+      'loadBalancers', 'natGateways', 'crossRegionLinks', 'environments', 'cloudPlatforms'
+    ];
+
+    const allInputs = numericIds.concat(['firewallHa', 'ddos', 'hubSpoke', 'automation', 'deploymentModel']);
+
+    const sampleValues = {
+      vnets: 4,
+      regions: 2,
+      cloudFirewalls: 2,
+      connectivity: 1,
+      transitHubs: 1,
+      waf: 1,
+      vpn: 4,
+      firewallHa: 'Yes',
+      loadBalancers: 2,
+      natGateways: 2,
+      ddos: 'Yes',
+      crossRegionLinks: 2,
+      hubSpoke: 'Yes',
+      automation: 'Yes',
+      environments: 3,
+      deploymentModel: 'Multi-Cloud',
+      cloudPlatforms: 2
+    };
+
+    function fmt(value) {
+      const num = Number(value || 0);
+      return num.toFixed(2).replace(/\.00$/, '').replace(/(\.\d*[1-9])0$/, '$1');
+    }
+
+    function fmtPct(value) {
+      return (Number(value || 0) * 100).toFixed(0) + '%';
+    }
+
+    function escapeXml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+    }
+
+    function getIntegerValue(id) {
+      const field = document.getElementById(id);
+      const raw = field.value.trim();
+      if (raw === '') return 0;
+      return Number(raw);
+    }
+
+    function readInputs() {
+      return {
+        vnets: getIntegerValue('vnets'),
+        regions: getIntegerValue('regions'),
+        cloudFirewalls: getIntegerValue('cloudFirewalls'),
+        connectivity: getIntegerValue('connectivity'),
+        transitHubs: getIntegerValue('transitHubs'),
+        waf: getIntegerValue('waf'),
+        vpn: getIntegerValue('vpn'),
+        firewallHa: document.getElementById('firewallHa').value,
+        loadBalancers: getIntegerValue('loadBalancers'),
+        natGateways: getIntegerValue('natGateways'),
+        ddos: document.getElementById('ddos').value,
+        crossRegionLinks: getIntegerValue('crossRegionLinks'),
+        hubSpoke: document.getElementById('hubSpoke').value,
+        automation: document.getElementById('automation').value,
+        environments: getIntegerValue('environments'),
+        deploymentModel: document.getElementById('deploymentModel').value,
+        cloudPlatforms: getIntegerValue('cloudPlatforms')
+      };
+    }
+
+    function validate(inputs) {
+      const errors = [];
+      numericIds.forEach((id) => document.getElementById(id).classList.remove('invalid'));
+
+      numericIds.forEach((id) => {
+        const field = document.getElementById(id);
+        const raw = field.value.trim();
+        if (raw === '') return;
+        const num = Number(raw);
+        const min = (id === 'environments' || id === 'cloudPlatforms') ? 1 : 0;
+        if (!Number.isFinite(num) || !Number.isInteger(num) || num < min) {
+          field.classList.add('invalid');
+          if (id === 'environments' || id === 'cloudPlatforms') {
+            errors.push('Environments and Cloud Platforms must be whole numbers of 1 or greater.');
+          } else {
+            errors.push('All quantity inputs must be whole numbers of 0 or greater.');
+          }
+        }
+      });
+
+      if (inputs.deploymentModel === 'Single-Cloud' && inputs.cloudPlatforms !== 1) {
+        document.getElementById('cloudPlatforms').classList.add('invalid');
+        errors.push('Single-Cloud deployment requires Number of Cloud Platforms = 1.');
+      }
+
+      if (inputs.deploymentModel === 'Multi-Cloud' && inputs.cloudPlatforms < 2) {
+        document.getElementById('cloudPlatforms').classList.add('invalid');
+        errors.push('Multi-Cloud deployment requires Number of Cloud Platforms of at least 2.');
+      }
+
+      return [...new Set(errors)];
+    }
+
+    function getProjectSize(inputs) {
+      const score = inputs.vnets + (inputs.regions * 2) + (inputs.cloudFirewalls * 2) + (inputs.transitHubs * 2);
+      if (score >= 15) return { size: 'Large', score };
+      if (score >= 7) return { size: 'Medium', score };
+      return { size: 'Small', score };
+    }
+
+    function calculate(inputs) {
+      const sizeInfo = getProjectSize(inputs);
+      const base = assumptions.base[sizeInfo.size];
+      const environmentUplift = inputs.environments > 1 ? (inputs.environments - 1) * 0.2 : 0;
+      const automationUplift = inputs.automation === 'Yes' ? 0.15 : 0;
+      const multiCloudUplift = inputs.cloudPlatforms > 1 ? (inputs.cloudPlatforms - 1) * 0.3 : 0;
+      const totalUplift = environmentUplift + automationUplift + multiCloudUplift;
+
+      const discovery = base.discovery * (1 + totalUplift);
+      const design = base.design * (1 + totalUplift);
+      const testing = base.testing * (1 + totalUplift);
+
+      const breakdown = assumptions.implementationRates.map((item) => {
+        const qty = item.qty(inputs);
+        const total = qty * item.hours;
+        return { label: item.label, qty, hours: item.hours, total };
+      });
+
+      const implementation = breakdown.reduce((sum, row) => sum + row.total, 0);
+      const hypercare = implementation * assumptions.hypercarePct;
+
+      const phases = { discovery, design, testing, implementation, hypercare };
+      const architectTotal =
+        (discovery * assumptions.roleSplit.discovery.arch) +
+        (design * assumptions.roleSplit.design.arch) +
+        (testing * assumptions.roleSplit.testing.arch) +
+        (implementation * assumptions.roleSplit.implementation.arch) +
+        (hypercare * assumptions.roleSplit.hypercare.arch);
+      const smeTotal =
+        (discovery * assumptions.roleSplit.discovery.sme) +
+        (design * assumptions.roleSplit.design.sme) +
+        (testing * assumptions.roleSplit.testing.sme) +
+        (implementation * assumptions.roleSplit.implementation.sme) +
+        (hypercare * assumptions.roleSplit.hypercare.sme);
+
+      return {
+        inputs,
+        sizeInfo,
+        uplifts: { environmentUplift, automationUplift, multiCloudUplift, totalUplift },
+        breakdown,
+        phases,
+        implementation,
+        hypercare,
+        totalEngineering: discovery + design + testing + implementation + hypercare,
+        architectTotal,
+        smeTotal
+      };
+    }
+
+    function setPair(prefix, total, archPct, smePct) {
+      document.getElementById(prefix + 'Hours').textContent = fmt(total);
+      document.getElementById(prefix + 'Arch').textContent = fmt(total * archPct);
+      document.getElementById(prefix + 'Sme').textContent = fmt(total * smePct);
+    }
+
+    function renderBreakdown(result) {
+      const body = document.getElementById('implementationBody');
+      body.innerHTML = '';
+
+      result.breakdown.forEach((row) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML =
+          '<td>' + escapeXml(row.label) + '</td>' +
+          '<td class="right">' + fmt(row.qty) + '</td>' +
+          '<td class="right">' + fmt(row.hours) + '</td>' +
+          '<td class="right">' + fmt(row.total) + '</td>';
+        body.appendChild(tr);
+      });
+
+      const totalRow = document.createElement('tr');
+      totalRow.className = 'total-row';
+      totalRow.innerHTML =
+        '<td>Implementation Total</td>' +
+        '<td class="right"></td>' +
+        '<td class="right"></td>' +
+        '<td class="right">' + fmt(result.implementation) + '</td>';
+      body.appendChild(totalRow);
+    }
+
+    function renderResult(result) {
+      document.getElementById('projectSize').textContent = result.sizeInfo.size;
+      document.getElementById('totalUpliftCard').textContent = fmtPct(result.uplifts.totalUplift);
+      document.getElementById('implementationTotalCard').textContent = fmt(result.implementation);
+      document.getElementById('totalEngineering').textContent = fmt(result.totalEngineering);
+      document.getElementById('scenarioText').innerHTML =
+        'Deployment: ' + escapeXml(result.inputs.deploymentModel) + '<br />' +
+        'Platforms: ' + fmt(result.inputs.cloudPlatforms) + '<br />' +
+        'Environments: ' + fmt(result.inputs.environments) + '<br />' +
+        'Score: ' + fmt(result.sizeInfo.score);
+
+      setPair('discovery', result.phases.discovery, 0.3, 0.7);
+      setPair('design', result.phases.design, 0.7, 0.3);
+      setPair('testing', result.phases.testing, 0.3, 0.7);
+      setPair('implementation', result.phases.implementation, 0.3, 0.7);
+      setPair('hypercare', result.phases.hypercare, 0.3, 0.7);
+      document.getElementById('totalArchitectHours').textContent = fmt(result.architectTotal);
+      document.getElementById('totalSmeHours').textContent = fmt(result.smeTotal);
+      renderBreakdown(result);
+    }
+
+    function showMessage(elementId, message) {
+      const el = document.getElementById(elementId);
+      if (!message) {
+        el.style.display = 'none';
+        el.textContent = '';
+        return;
+      }
+      el.style.display = 'block';
+      el.textContent = message;
+    }
+
+    function currentResult() {
+      const inputs = readInputs();
+      const errors = validate(inputs);
+      const exportBtn = document.getElementById('exportExcel');
+      const pdfBtn = document.getElementById('printPdf');
+
+      if (errors.length) {
+        showMessage('validationMsg', errors.join(' '));
+        exportBtn.disabled = true;
+        pdfBtn.disabled = true;
+        return null;
+      }
+
+      showMessage('validationMsg', '');
+      exportBtn.disabled = false;
+      pdfBtn.disabled = false;
+      return calculate(inputs);
+    }
+
+    function update() {
+      const result = currentResult();
+      if (result) renderResult(result);
+    }
+
+    function loadSample() {
+      Object.keys(sampleValues).forEach((key) => {
+        document.getElementById(key).value = sampleValues[key];
+      });
+      showMessage('actionMsg', 'Sample values loaded.');
+      update();
+      setTimeout(() => showMessage('actionMsg', ''), 2200);
+    }
+
+    function resetForm() {
+      numericIds.forEach((id) => {
+        document.getElementById(id).value = (id === 'environments' || id === 'cloudPlatforms') ? 1 : 0;
+      });
+      document.getElementById('firewallHa').value = 'No';
+      document.getElementById('ddos').value = 'No';
+      document.getElementById('hubSpoke').value = 'No';
+      document.getElementById('automation').value = 'No';
+      document.getElementById('deploymentModel').value = 'Single-Cloud';
+      showMessage('actionMsg', 'Form reset.');
+      update();
+      setTimeout(() => showMessage('actionMsg', ''), 1800);
+    }
+
+    function xmlCell(value, type) {
+      if (type === 'Number') {
+        return '<Cell><Data ss:Type="Number">' + value + '</Data></Cell>';
+      }
+      return '<Cell><Data ss:Type="String">' + escapeXml(value) + '</Data></Cell>';
+    }
+
+    function exportExcel() {
+      const result = currentResult();
+      if (!result) return;
+
+      const now = new Date();
+      const timestamp = now.getFullYear() + '-' +
+        String(now.getMonth() + 1).padStart(2, '0') + '-' +
+        String(now.getDate()).padStart(2, '0') + ' ' +
+        String(now.getHours()).padStart(2, '0') + ':' +
+        String(now.getMinutes()).padStart(2, '0');
+
+      const inputRows = [
+        ['Cloud Network Effort Calculator Export'],
+        ['Generated', timestamp],
+        [],
+        ['Project Inputs'],
+        ['Number of Virtual Networks (VNet / VPC)', result.inputs.vnets],
+        ['Number of Regions', result.inputs.regions],
+        ['Number of Cloud Network Firewalls', result.inputs.cloudFirewalls],
+        ['Number of Dedicated Cloud Connectivity', result.inputs.connectivity],
+        ['Number of Cloud Transit / Network Hubs', result.inputs.transitHubs],
+        ['Number of Web Application Firewalls (WAF)', result.inputs.waf],
+        ['Number of Site-to-Site VPN Connections', result.inputs.vpn],
+        ['Firewall High Availability Required', result.inputs.firewallHa],
+        ['Number of Layer 4 Load Balancers', result.inputs.loadBalancers],
+        ['Number of Outbound NAT Gateways', result.inputs.natGateways],
+        ['DDoS Protection Service Enabled', result.inputs.ddos],
+        ['Number of Cross-Region Connectivity Links', result.inputs.crossRegionLinks],
+        ['Hub-and-Spoke Architecture Deployment Required', result.inputs.hubSpoke],
+        ['Automation / IaC Required', result.inputs.automation],
+        ['Number of Environments', result.inputs.environments],
+        ['Deployment Model', result.inputs.deploymentModel],
+        ['Number of Cloud Platforms', result.inputs.cloudPlatforms]
+      ];
+
+      const summaryRows = [
+        ['Effort Calculator Summary'],
+        ['Generated', timestamp],
+        ['Project Size', result.sizeInfo.size],
+        ['Score', result.sizeInfo.score],
+        ['Environment Uplift', result.uplifts.environmentUplift],
+        ['Automation Uplift', result.uplifts.automationUplift],
+        ['Multi-Cloud Uplift', result.uplifts.multiCloudUplift],
+        ['Total Uplift', result.uplifts.totalUplift],
+        ['Total Engineering Effort', result.totalEngineering],
+        [],
+        ['Phase', 'Total Hours', 'Architect %', 'Architect Hours', 'SME %', 'SME Hours'],
+        ['Discovery', result.phases.discovery, 0.3, result.phases.discovery * 0.3, 0.7, result.phases.discovery * 0.7],
+        ['Design', result.phases.design, 0.7, result.phases.design * 0.7, 0.3, result.phases.design * 0.3],
+        ['Testing', result.phases.testing, 0.3, result.phases.testing * 0.3, 0.7, result.phases.testing * 0.7],
+        ['Implementation', result.phases.implementation, 0.3, result.phases.implementation * 0.3, 0.7, result.phases.implementation * 0.7],
+        ['Hypercare', result.phases.hypercare, 0.3, result.phases.hypercare * 0.3, 0.7, result.phases.hypercare * 0.7],
+        [],
+        ['Total Architect Hours', result.architectTotal],
+        ['Total SME Hours', result.smeTotal]
+      ];
+
+      const breakdownRows = [
+        ['Implementation Breakdown'],
+        ['Component', 'Qty', 'Hours per Unit', 'Total Hours']
+      ].concat(result.breakdown.map((row) => [row.label, row.qty, row.hours, row.total])).concat([
+        [],
+        ['Implementation Total', '', '', result.implementation],
+        ['Hypercare (4%)', '', '', result.hypercare]
+      ]);
+
+      function sheetXml(name, rows) {
+        const xmlRows = rows.map((row) => {
+          if (!row || row.length === 0) return '<Row></Row>';
+          const cells = row.map((cell) => {
+            const type = typeof cell === 'number' ? 'Number' : 'String';
+            return xmlCell(cell, type);
+          }).join('');
+          return '<Row>' + cells + '</Row>';
+        }).join('');
+        return '<Worksheet ss:Name="' + escapeXml(name) + '"><Table>' + xmlRows + '</Table></Worksheet>';
+      }
+
+      const workbookXml =
+        '<?xml version="1.0"?>' +
+        '<?mso-application progid="Excel.Sheet"?>' +
+        '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" ' +
+        'xmlns:o="urn:schemas-microsoft-com:office:office" ' +
+        'xmlns:x="urn:schemas-microsoft-com:office:excel" ' +
+        'xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet" ' +
+        'xmlns:html="http://www.w3.org/TR/REC-html40">' +
+        sheetXml('Project Inputs', inputRows) +
+        sheetXml('Effort Summary', summaryRows) +
+        sheetXml('Implementation', breakdownRows) +
+        '</Workbook>';
+
+      const blob = new Blob([workbookXml], { type: 'application/vnd.ms-excel' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'cloud_network_effort_export.xls';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      showMessage('actionMsg', 'Excel export downloaded.');
+      setTimeout(() => showMessage('actionMsg', ''), 2200);
+    }
+
+    function printPdf() {
+      const result = currentResult();
+      if (!result) return;
+      showMessage('actionMsg', 'Print dialog opened. Choose "Save as PDF" if needed.');
+      setTimeout(() => showMessage('actionMsg', ''), 2600);
+      window.print();
+    }
+
+    allInputs.forEach((id) => {
+      document.getElementById(id).addEventListener('input', update);
+      document.getElementById(id).addEventListener('change', update);
+    });
+
+    document.getElementById('loadSample').addEventListener('click', loadSample);
+    document.getElementById('resetForm').addEventListener('click', resetForm);
+    document.getElementById('exportExcel').addEventListener('click', exportExcel);
+    document.getElementById('printPdf').addEventListener('click', printPdf);
+
+    update();
+  </script>
+</body>
+</html>
