@@ -37,8 +37,79 @@
     @media (max-width:640px){.summary-grid{grid-template-columns:1fr}.field{grid-template-columns:1fr}.mini-grid{grid-template-columns:1fr}.toolbar{flex-direction:column}.btn{width:100%}}
     @media print{.toolbar,.admin-card,.builder-panel{display:none}.page{max-width:none;margin:0;padding:0}.panel,.summary-card,.hero{box-shadow:none}}
   </style>
+
+<style id="logo-fix">
+.hero{
+  position:relative !important;
+}
+.logo-wrap{
+  position:absolute !important;
+  top:14px !important;
+  left:18px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  background:#ffffff !important;
+  border-radius:10px !important;
+  padding:6px 10px !important;
+  box-shadow:0 6px 14px rgba(0,0,0,.15) !important;
+  z-index:5 !important;
+}
+.logo-wrap img{
+  display:block !important;
+  height:22px !important;
+  width:auto !important;
+}
+.hero .title-wrap{
+  padding-left:170px !important;
+}
+@media (max-width:1100px){
+  .logo-wrap{
+    position:static !important;
+    margin-bottom:12px !important;
+    width:max-content !important;
+  }
+  .hero .title-wrap{
+    padding-left:0 !important;
+    padding-top:0 !important;
+  }
+}
+</style>
+
+
+<style id="global-logo-fix">
+.global-logo{
+  position:fixed;
+  top:14px;
+  left:18px;
+  z-index:1000;
+  padding:0;
+  background:transparent;
+  box-shadow:none;
+}
+.global-logo img{
+  height:22px;
+  display:block;
+}
+@media print{
+  .global-logo{
+  position:fixed;
+  top:14px;
+  left:18px;
+  z-index:1000;
+  padding:0;
+  background:transparent;
+  box-shadow:none;
+}
+}
+</style>
+
 </head>
 <body>
+<div class="global-logo">
+  <img src="https://s7d1.scene7.com/is/image/kyndryl/logo-header?qlt=85&ts=1712781462020&$SVG-Transparency$&dpr=off" />
+</div>
+
   <div class="page">
     <section class="hero">
       <img src="https://s7d1.scene7.com/is/image/kyndryl/logo-header?qlt=85&ts=1712781462020&$SVG-Transparency$&dpr=off" alt="Kyndryl" />
