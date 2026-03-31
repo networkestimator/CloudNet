@@ -9,9 +9,24 @@
     *{box-sizing:border-box} body{margin:0;font-family:Inter,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.45}
     .page{max-width:1440px;margin:24px auto 36px;padding:0 16px}
     .hero{position:relative;background:var(--brand);color:#fff;border-radius:16px;padding:18px 22px;box-shadow:var(--shadow);margin-bottom:16px}
-    .hero img{position:absolute;left:18px;top:16px;height:26px}.hero .title-wrap{padding-left:150px}
-    .hero h1{margin:0 0 8px;font-size:27px;font-weight:800;letter-spacing:-0.02em;color:#fff}
-    .hero p{margin:0;font-size:14px;color:#fff;opacity:.95}
+    .hero img{position:absolute;left:18px;top:16px;height:26px}.hero .title-wrap{padding-left:0;text-align:left}
+    .hero h1{
+  margin:0 0 8px;
+  font-size:27px;
+  font-weight:800;
+  letter-spacing:-0.02em;
+  color:#fff;
+  padding-left:0 !important;
+  text-align:left;
+}
+    .hero p{
+  margin:0;
+  font-size:14px;
+  color:#fff;
+  opacity:.95;
+  padding-left:0 !important;
+  text-align:left;
+}
     .toolbar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px}
     .btn{border:none;border-radius:10px;min-height:38px;padding:0 14px;font-size:14px;font-weight:700;cursor:pointer;background:var(--brand);color:#fff;box-shadow:0 6px 14px rgba(16,35,61,.08)}
     .btn.secondary{background:#fff;color:var(--brand);border:1px solid #f0b4ab;box-shadow:none}
@@ -61,7 +76,8 @@
   width:auto !important;
 }
 .hero .title-wrap{
-  padding-left:170px !important;
+  padding-left:0 !important;
+  text-align:left !important;
 }
 @media (max-width:1100px){
   .logo-wrap{
@@ -104,18 +120,99 @@
 }
 </style>
 
+
+<style id="v7-responsive-clean-fix">
+/* Retain v5 layout, but make logo part of the normal flow so it never overlaps */
+.page{
+  max-width:1440px !important;
+  margin:24px auto 36px !important;
+  padding:0 16px !important;
+}
+
+.global-logo-row{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  margin:0 0 10px 0 !important;
+  min-height:26px !important;
+}
+
+.global-logo{
+  position:static !important;
+  top:auto !important;
+  left:auto !important;
+  z-index:auto !important;
+  padding:0 !important;
+  background:transparent !important;
+  box-shadow:none !important;
+}
+
+.global-logo img{
+  display:block !important;
+  height:24px !important;
+  width:auto !important;
+  max-width:160px !important;
+}
+
+.hero{
+  margin-top:0 !important;
+}
+
+body{
+  overflow-x:hidden !important;
+}
+
+@media (max-width:1100px){
+  .page{
+    max-width:100% !important;
+    padding:0 14px !important;
+  }
+  .layout{
+    grid-template-columns:1fr !important;
+  }
+  .summary-grid{
+    grid-template-columns:repeat(2, minmax(0,1fr)) !important;
+  }
+  .global-logo-row{
+    margin-bottom:8px !important;
+  }
+  .global-logo img{
+    height:22px !important;
+    max-width:140px !important;
+  }
+}
+
+@media (max-width:640px){
+  .summary-grid{
+    grid-template-columns:1fr !important;
+  }
+  .toolbar{
+    flex-direction:column !important;
+  }
+  .btn{
+    width:100% !important;
+  }
+  .global-logo img{
+    height:20px !important;
+    max-width:120px !important;
+  }
+}
+</style>
+
 </head>
 <body>
-<div class="global-logo">
-  <img src="https://s7d1.scene7.com/is/image/kyndryl/logo-header?qlt=85&ts=1712781462020&$SVG-Transparency$&dpr=off" />
+<div class="global-logo-row">
+  <div class="global-logo">
+    <img src="https://s7d1.scene7.com/is/image/kyndryl/logo-header?qlt=85&ts=1712781462020&$SVG-Transparency$&dpr=off" alt="" aria-hidden="true" />
+  </div>
 </div>
 
   <div class="page">
     <section class="hero">
-      <img src="https://s7d1.scene7.com/is/image/kyndryl/logo-header?qlt=85&ts=1712781462020&$SVG-Transparency$&dpr=off" alt="Kyndryl" />
+      
       <div class="title-wrap">
         <h1>Cloud Network Effort Calculator</h1>
-        <p>No-code dynamic version. New cloud project fields can be added on the page and mapped to the formula engine without editing HTML.</p>
+        <p class="left-text">No-code dynamic version. New cloud project fields can be added on the page and mapped to the formula engine without editing HTML.</p>
       </div>
     </section>
 
