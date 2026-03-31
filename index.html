@@ -3,757 +3,239 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cloud Network Effort Estimator</title>
-    <style>
-    :root{
-      --brand:#FF452E;
-      --bg:#eef2f7;
-      --panel:#ffffff;
-      --line:#d7deea;
-      --text:#12233d;
-      --muted:#5e708c;
-      --shadow:0 14px 28px rgba(16,35,61,.10);
-    }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:Inter,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.45}
+  <title>Cloud Network Effort Calculator - Dynamic Builder</title>
+  <style>
+    :root{--brand:#FF452E;--bg:#eef2f7;--panel:#ffffff;--line:#d7deea;--text:#12233d;--muted:#5e708c;--shadow:0 14px 28px rgba(16,35,61,.10)}
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.45}
     .page{max-width:1440px;margin:24px auto 36px;padding:0 16px}
-    .hero,.panel,.table-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
-    .hero{position:relative;background:var(--brand);color:#fff;padding:18px 22px;margin-bottom:16px}
-    .hero::before{content:"";position:absolute;left:18px;top:16px;width:140px;height:26px;background:url("https://s7d1.scene7.com/is/image/kyndryl/logo-header?qlt=85&ts=1712781462020&$SVG-Transparency$&dpr=off") no-repeat left center/contain}
-    .hero h1{margin:0 0 8px;padding-left:150px;font-size:27px;font-weight:800;letter-spacing:-0.02em;color:#fff}
-    .hero p{margin:0;padding-left:150px;font-size:14px;color:#fff;opacity:.95;max-width:980px}
+    .hero{position:relative;background:var(--brand);color:#fff;border-radius:16px;padding:18px 22px;box-shadow:var(--shadow);margin-bottom:16px}
+    .hero img{position:absolute;left:18px;top:16px;height:26px}.hero .title-wrap{padding-left:150px}
+    .hero h1{margin:0 0 8px;font-size:27px;font-weight:800;letter-spacing:-0.02em;color:#fff}
+    .hero p{margin:0;font-size:14px;color:#fff;opacity:.95}
+    .toolbar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+    .btn{border:none;border-radius:10px;min-height:38px;padding:0 14px;font-size:14px;font-weight:700;cursor:pointer;background:var(--brand);color:#fff;box-shadow:0 6px 14px rgba(16,35,61,.08)}
+    .btn.secondary{background:#fff;color:var(--brand);border:1px solid #f0b4ab;box-shadow:none}
+    .btn.ghost{background:#fff;color:var(--text);border:1px solid var(--line);box-shadow:none}
     .layout{display:grid;grid-template-columns:380px 1fr;gap:18px;align-items:start}
-    .panel{padding:16px}
-    .section-title{margin:0 0 10px;font-size:16px;font-weight:800;color:var(--text)}
-    .subtle{color:var(--muted);font-size:14px;margin-top:0;margin-bottom:16px}
-    .group-title{font-size:13px;margin:20px 0 12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:800}
-    .grid{display:grid;grid-template-columns:1fr;gap:12px}
-    .field{display:grid;grid-template-columns:1fr 120px;gap:12px;align-items:center}
-    .field.full{grid-template-columns:1fr}
-    .field label{font-size:14px;line-height:1.35;color:var(--text);font-weight:400}
-    .field input,.field select{width:100%;height:34px;border:1px solid #bcc8da;border-radius:8px;padding:0 10px;font-size:14px;background:#fff;color:var(--text)}
-    .field.full input,.field.full select{height:auto;min-height:34px;padding:8px 10px}
-    .field input:focus,.field select:focus{outline:none;border-color:#ff7d6d;box-shadow:0 0 0 3px rgba(255,69,46,.12)}
-    .field input.invalid,.field select.invalid{border-color:#c62828;background:#fff4f2}
-    .helper{font-size:12px;color:var(--muted);margin-top:4px;grid-column:1 / -1}
-    .controls{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
-    button{border:none;border-radius:10px;min-height:38px;padding:0 14px;font-size:14px;font-weight:700;cursor:pointer;background:var(--brand);color:#fff;box-shadow:0 6px 14px rgba(16,35,61,.08);transition:.18s ease}
-    button:hover{transform:translateY(-1px)}
-    button.primary,button.secondary,button.outline{background:var(--brand);color:#fff;border:none}
-    button:disabled{opacity:.5;cursor:not-allowed;transform:none}
-    .message{margin-top:14px;padding:12px 14px;border-radius:12px;font-size:14px;display:none}
-    .message.error{background:#fff1ef;color:#b42318;border:1px solid #ffc8bf}
-    .message.info{background:#fff7f5;color:var(--brand);border:1px solid #ffd0ca}
-    .results-head{display:flex;justify-content:space-between;gap:16px;align-items:start;margin-bottom:16px}
-    .results-head p{margin:6px 0 0;color:var(--muted);font-size:14px;max-width:650px}
-    .meta{text-align:right;font-size:13px;color:var(--muted);min-width:210px;line-height:1.55}
-    .cards{display:grid;grid-template-columns:repeat(4,minmax(200px,1fr));gap:12px;margin-bottom:16px}
-    .stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 14px 12px;box-shadow:var(--shadow);min-height:84px}
-    .stat-label{display:block;font-size:12px;line-height:1.35;font-weight:800;text-transform:uppercase;color:#000;margin-bottom:6px;white-space:nowrap}
-    .stat-value{font-size:20px;font-weight:900;line-height:1.1;color:var(--brand);font-family:"Segoe UI Black","Arial Black",sans-serif}
-    .stack{display:grid;gap:18px}
-    .table-card{overflow:hidden;padding:0}
-    table{width:100%;border-collapse:collapse;font-size:14px}
-    thead th{background:#f2f6fb;padding:12px 10px;border:1px solid #c6d0df;text-align:left;font-size:13px;font-weight:800;color:var(--text)}
-    tbody td{padding:11px 10px;border:1px solid #c6d0df;vertical-align:top;background:#fff}
-    tbody tr.total-row td{font-weight:800;background:#f8fafc}
-    .right{text-align:right}
-    .footnote{margin-top:14px;font-size:12px;color:var(--muted);line-height:1.55}
-    .print-only{display:none}
+    .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+    .panel-title{margin:0;padding:14px 16px;font-size:16px;font-weight:800;background:linear-gradient(180deg,#f7f9fd,#eef3f9);border-bottom:1px solid var(--line);color:var(--text)}
+    .panel-body{padding:16px}.section-label{margin:0 0 12px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:800}
+    .input-grid{display:grid;grid-template-columns:1fr;gap:12px}.field{display:grid;grid-template-columns:1fr 120px;gap:12px;align-items:center}.field.full{grid-template-columns:1fr}
+    .field label{font-size:14px;line-height:1.35;color:var(--text)}
+    input,select{width:100%;height:34px;border:1px solid #bcc8da;border-radius:8px;padding:0 10px;font-size:14px;background:#fff;color:var(--text)}
+    input:focus,select:focus{outline:none;border-color:#ff7d6d;box-shadow:0 0 0 3px rgba(255,69,46,.12)}
+    .summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+    .summary-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 14px 12px;box-shadow:var(--shadow);min-height:84px}
+    .summary-card .label{display:block;font-size:12px;line-height:1.35;font-weight:800;text-transform:uppercase;color:#000;margin-bottom:6px;white-space:nowrap}
+    .summary-card .value{font-size:20px;font-weight:900;line-height:1.1;color:var(--brand);font-family:"Segoe UI Black","Arial Black",sans-serif}
+    table{width:100%;border-collapse:collapse;font-size:14px} th,td{border:1px solid #c6d0df;padding:9px 10px;text-align:left;vertical-align:middle} th{background:#f2f6fb;font-weight:800}
+    td.num,th.num{text-align:right}.stack{display:grid;gap:18px}.note{color:var(--muted);font-size:12px;margin-top:10px;line-height:1.5}
+    .mini-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.admin-card{border:1px dashed #e8a89f;background:#fff9f8;border-radius:12px;padding:12px;margin-top:14px}
+    .pill{display:inline-block;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:700;background:#fff3f1;color:var(--brand);border:1px solid #ffd0ca;margin-left:6px}
     .footer-center{text-align:center;margin:30px 0 10px;font-size:13px;color:#6b7280}
-    @media (max-width:1120px){.layout{grid-template-columns:1fr}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.hero h1,.hero p{padding-left:0}.hero::before{position:static;display:block;margin-bottom:12px;width:140px;height:26px}}
-    @media (max-width:720px){.page{padding:14px}.hero h1{font-size:26px}.grid,.cards{grid-template-columns:1fr}.results-head{flex-direction:column}.meta{text-align:left;min-width:0}.field{grid-template-columns:1fr}table{font-size:13px}.controls{flex-direction:column}button{width:100%}}
-    @media print{body{background:#fff}.page{max-width:none;padding:0}.no-print{display:none !important}.print-only{display:block}.footer-center{display:none}.hero,.panel,.table-card{box-shadow:none;border-radius:0}.layout{display:block}.panel{border:none;padding:0 0 16px}.table-card{border:1px solid #bfc7d4}button{display:none !important}a{text-decoration:none;color:inherit}}
+    @media (max-width:1100px){.layout{grid-template-columns:1fr}.summary-grid{grid-template-columns:repeat(2,1fr)}.hero .title-wrap{padding-left:0;padding-top:30px}.hero img{left:22px;top:16px}}
+    @media (max-width:640px){.summary-grid{grid-template-columns:1fr}.field{grid-template-columns:1fr}.mini-grid{grid-template-columns:1fr}.toolbar{flex-direction:column}.btn{width:100%}}
+    @media print{.toolbar,.admin-card,.builder-panel{display:none}.page{max-width:none;margin:0;padding:0}.panel,.summary-card,.hero{box-shadow:none}}
   </style>
 </head>
 <body>
   <div class="page">
     <section class="hero">
-      <h1>Cloud Network Effort Estimator</h1>
-      <p>
-        Spreadsheet-style Estimator for discovery, design, testing, implementation, and hypercare effort.
-        It includes full project inputs, automatic recalculation, validation, implementation breakdown, and export to Excel or PDF.
-      </p>
+      <img src="https://s7d1.scene7.com/is/image/kyndryl/logo-header?qlt=85&ts=1712781462020&$SVG-Transparency$&dpr=off" alt="Kyndryl" />
+      <div class="title-wrap">
+        <h1>Cloud Network Effort Calculator</h1>
+        <p>No-code dynamic version. New cloud project fields can be added on the page and mapped to the formula engine without editing HTML.</p>
+      </div>
     </section>
 
+    <div class="toolbar">
+      <button class="btn" id="loadSample">Load Sample Values</button>
+      <button class="btn" id="openBuilder">Customize Fields</button>
+      <button class="btn ghost" id="resetInputs">Reset Inputs</button>
+      <button class="btn ghost" id="exportExcel">Export to Excel</button>
+      <button class="btn ghost" id="printPdf">Print / Save PDF</button>
+    </div>
+
     <div class="layout">
-      <section class="panel no-print">
-        <h2 class="section-title">Project Inputs</h2>
-        <div class="subtle">Update any value and the Estimator refreshes automatically.</div>
+      <section class="panel">
+        <h2 class="panel-title">Project Inputs</h2>
+        <div class="panel-body">
+          <div id="dynamicInputs"></div>
 
-        <h3 class="group-title">Core Topology</h3>
-        <div class="grid">
-          <div class="field">
-            <label for="vnets">Number of Virtual Networks (VNet / VPC)</label>
-            <input id="vnets" type="number" min="0" step="1" value="0" />
+          <div class="admin-card builder-panel" id="builderPanel" style="display:none;">
+            <div class="section-label">Add new input field <span class="pill">No code</span></div>
+            <div class="mini-grid">
+              <div class="field full"><label>Field Label</label><input id="newLabel" placeholder="Example: Cloud Routers" /></div>
+              <div class="field full"><label>Field Key</label><input id="newKey" placeholder="Example: routers" /></div>
+              <div class="field full"><label>Section</label><select id="newSection"><option value="Core Topology">Core Topology</option><option value="Security & Connectivity Services">Security & Connectivity Services</option><option value="Application Edge Services">Application Edge Services</option><option value="Custom Fields">Custom Fields</option></select></div>
+              <div class="field full"><label>Input Type</label><select id="newType"><option value="number">Number</option><option value="select">Select</option></select></div>
+              <div class="field full"><label>Default Value</label><input id="newDefault" placeholder="0 or Yes" /></div>
+              <div class="field full"><label>Select Options (comma separated, for Select type only)</label><input id="newOptions" placeholder="Yes,No" /></div>
+              <div class="field full"><label>Formula Role</label><select id="newRole"><option value="none">Informational only</option><option value="implementation">Implementation component</option><option value="uplift_env">Environment uplift driver</option><option value="uplift_multi">Multi-cloud uplift driver</option><option value="uplift_automation">Automation uplift driver</option><option value="size_score">Project size score driver</option></select></div>
+              <div class="field full"><label>Hours per Unit (for Implementation role)</label><input id="newRate" type="number" step="0.01" placeholder="Example: 20" /></div>
+              <div class="field full"><label>Score Weight (for Project size score driver)</label><input id="newScoreWeight" type="number" step="0.01" placeholder="Example: 2" /></div>
+            </div>
+            <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="btn" id="addFieldBtn" type="button">Add Field</button>
+              <button class="btn secondary" id="saveSchemaBtn" type="button">Save Customization</button>
+              <button class="btn secondary" id="restoreDefaultsBtn" type="button">Restore Defaults</button>
+            </div>
+            <div class="note">Example: to add a new Router input without coding, set <b>Formula Role = Implementation component</b> and enter its <b>Hours per Unit</b>. The new field will immediately affect Implementation hours. Changes are saved in your browser.</div>
           </div>
-          <div class="field">
-            <label for="regions">Number of Regions</label>
-            <input id="regions" type="number" min="0" step="1" value="0" />
-          </div>
-          <div class="field">
-            <label for="cloudFirewalls">Number of Cloud Network Firewalls</label>
-            <input id="cloudFirewalls" type="number" min="0" step="1" value="0" />
-          </div>
-          <div class="field">
-            <label for="connectivity">Number of Dedicated Cloud Connectivity</label>
-            <input id="connectivity" type="number" min="0" step="1" value="0" />
-          </div>
-          <div class="field">
-            <label for="transitHubs">Number of Cloud Transit / Network Hubs</label>
-            <input id="transitHubs" type="number" min="0" step="1" value="0" />
-          </div>
-          <div class="field">
-            <label for="crossRegionLinks">Number of Cross-Region Connectivity Links</label>
-            <input id="crossRegionLinks" type="number" min="0" step="1" value="0" />
-          </div>
-          <div class="field">
-            <label for="environments">Number of Environments</label>
-            <input id="environments" type="number" min="1" step="1" value="1" />
-            <div class="helper">Environment uplift starts from the second environment.</div>
-          </div>
-          <div class="field">
-            <label for="cloudPlatforms">Number of Cloud Platforms</label>
-            <input id="cloudPlatforms" type="number" min="1" step="1" value="1" />
-          </div>
+
+          <div class="note">This version is schema-driven. New fields render automatically from configuration and safely plug into the cloud calculation engine.</div>
         </div>
-
-        <h3 class="group-title">Security &amp; Connectivity Services</h3>
-        <div class="grid">
-          <div class="field">
-            <label for="waf">Number of Web Application Firewalls (WAF)</label>
-            <input id="waf" type="number" min="0" step="1" value="0" />
-          </div>
-          <div class="field">
-            <label for="vpn">Number of Site-to-Site VPN Connections</label>
-            <input id="vpn" type="number" min="0" step="1" value="0" />
-          </div>
-          <div class="field">
-            <label for="firewallHa">Firewall High Availability Required</label>
-            <select id="firewallHa">
-              <option value="No">No</option>
-              <option value="Yes">Yes</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="ddos">DDoS Protection Service Enabled</label>
-            <select id="ddos">
-              <option value="No">No</option>
-              <option value="Yes">Yes</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="hubSpoke">Hub-and-Spoke Architecture Deployment Required</label>
-            <select id="hubSpoke">
-              <option value="No">No</option>
-              <option value="Yes">Yes</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="automation">Automation / IaC Required</label>
-            <select id="automation">
-              <option value="No">No</option>
-              <option value="Yes">Yes</option>
-            </select>
-          </div>
-        </div>
-
-        <h3 class="group-title">Application Edge Services</h3>
-        <div class="grid">
-          <div class="field">
-            <label for="loadBalancers">Number of Layer 4 Load Balancers</label>
-            <input id="loadBalancers" type="number" min="0" step="1" value="0" />
-          </div>
-          <div class="field">
-            <label for="natGateways">Number of Outbound NAT Gateways</label>
-            <input id="natGateways" type="number" min="0" step="1" value="0" />
-          </div>
-          <div class="field full">
-            <label for="deploymentModel">Deployment Model</label>
-            <select id="deploymentModel">
-              <option value="Single-Cloud">Single-Cloud</option>
-              <option value="Multi-Cloud">Multi-Cloud</option>
-            </select>
-            <div class="helper">Used for scenario labeling. Multi-cloud uplift is driven by the Number of Cloud Platforms.</div>
-          </div>
-        </div>
-
-        <div class="controls">
-          <button class="secondary" id="loadSample">Load Sample Values</button>
-          <button class="secondary" id="resetForm">Reset</button>
-          <button class="outline" id="exportExcel">Export to Excel</button>
-          <button class="primary" id="printPdf">Print / Save PDF</button>
-        </div>
-
-        <div class="message error" id="validationMsg"></div>
-        <div class="message info" id="actionMsg"></div>
       </section>
 
-      <section class="panel">
-        <div class="results-head">
-          <div>
-            <h2 class="section-title" style="margin-bottom:0;">Effort Estimator Summary</h2>
-            <p>
-              Project size is driven by VNets, regions, cloud firewalls, and transit hubs.
-              Baseline uplift is applied only to discovery, design, and testing. Implementation is calculated component-wise.
-            </p>
-          </div>
-          <div class="meta" id="scenarioText">
-            Deployment: Single-Cloud<br />
-            Platforms: 1<br />
-            Environments: 1
-          </div>
+      <section class="stack">
+        <div class="summary-grid">
+          <div class="summary-card"><span class="label">Project Size</span><span class="value" id="projectSize">Small</span></div>
+          <div class="summary-card"><span class="label">Total Uplift</span><span class="value" id="totalUplift">0%</span></div>
+          <div class="summary-card"><span class="label">Implementation Total</span><span class="value" id="implementationTotal">0</span></div>
+          <div class="summary-card"><span class="label">Total Engineering Effort</span><span class="value" id="totalEngineering">0</span></div>
         </div>
 
-        <div class="cards">
-          <div class="stat">
-            <div class="stat-label">Project Size</div>
-            <div class="stat-value" id="projectSize">Small</div>
-          </div>
-          <div class="stat">
-            <div class="stat-label">Total Uplift</div>
-            <div class="stat-value" id="totalUpliftCard">0%</div>
-          </div>
-          <div class="stat">
-            <div class="stat-label">Implementation Total</div>
-            <div class="stat-value" id="implementationTotalCard">0</div>
-          </div>
-          <div class="stat">
-            <div class="stat-label">Total Engineering Effort</div>
-            <div class="stat-value" id="totalEngineering">0</div>
-          </div>
-        </div>
-
-        <div class="stack">
-          <div class="table-card">
-            <table id="summaryTable">
-              <thead>
-                <tr>
-                  <th>Phase</th>
-                  <th class="right">Total Hours</th>
-                  <th class="right">Architect %</th>
-                  <th class="right">Architect Hours</th>
-                  <th class="right">SME %</th>
-                  <th class="right">SME Hours</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Discovery</td>
-                  <td class="right" id="discoveryHours">0</td>
-                  <td class="right">0.3</td>
-                  <td class="right" id="discoveryArch">0</td>
-                  <td class="right">0.7</td>
-                  <td class="right" id="discoverySme">0</td>
-                </tr>
-                <tr>
-                  <td>Design</td>
-                  <td class="right" id="designHours">0</td>
-                  <td class="right">0.7</td>
-                  <td class="right" id="designArch">0</td>
-                  <td class="right">0.3</td>
-                  <td class="right" id="designSme">0</td>
-                </tr>
-                <tr>
-                  <td>Testing</td>
-                  <td class="right" id="testingHours">0</td>
-                  <td class="right">0.3</td>
-                  <td class="right" id="testingArch">0</td>
-                  <td class="right">0.7</td>
-                  <td class="right" id="testingSme">0</td>
-                </tr>
-                <tr>
-                  <td>Implementation</td>
-                  <td class="right" id="implementationHours">0</td>
-                  <td class="right">0.3</td>
-                  <td class="right" id="implementationArch">0</td>
-                  <td class="right">0.7</td>
-                  <td class="right" id="implementationSme">0</td>
-                </tr>
-                <tr>
-                  <td>Hypercare</td>
-                  <td class="right" id="hypercareHours">0</td>
-                  <td class="right">0.3</td>
-                  <td class="right" id="hypercareArch">0</td>
-                  <td class="right">0.7</td>
-                  <td class="right" id="hypercareSme">0</td>
-                </tr>
-                <tr class="total-row">
-                  <td>Total Architect Hours</td>
-                  <td class="right" colspan="5" id="totalArchitectHours">0</td>
-                </tr>
-                <tr class="total-row">
-                  <td>Total SME Hours</td>
-                  <td class="right" colspan="5" id="totalSmeHours">0</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="table-card">
-            <table id="implementationTable">
-              <thead>
-                <tr>
-                  <th>Implementation Breakdown</th>
-                  <th class="right">Qty</th>
-                  <th class="right">Hours / Unit</th>
-                  <th class="right">Total Hours</th>
-                </tr>
-              </thead>
-              <tbody id="implementationBody"></tbody>
-            </table>
-          </div>
-        </div>
-
-        <div class="footnote print-only" style="margin-top:18px;">
-          Exported from Cloud Network Effort Estimator.
-        </div>
-        <div class="footnote" id="formulaNote">
-          Baseline reference: Small 24/48/16, Medium 44/100/40, Large 80/180/80. Hypercare is 4% of implementation.
-        </div>
+        <section class="panel"><h2 class="panel-title">Effort Summary</h2><div class="panel-body"><table><thead><tr><th>Phase</th><th class="num">Total Hours</th><th class="num">Architect %</th><th class="num">Architect Hours</th><th class="num">SME %</th><th class="num">SME Hours</th></tr></thead><tbody id="phaseSummaryBody"></tbody></table></div></section>
+        <section class="panel"><h2 class="panel-title">Implementation Breakdown</h2><div class="panel-body"><table><thead><tr><th>Component</th><th class="num">Qty</th><th class="num">Hours / Unit</th><th class="num">Total Hours</th></tr></thead><tbody id="breakdownBody"></tbody></table></div></section>
+        <section class="panel"><h2 class="panel-title">Active Formula Mapping</h2><div class="panel-body"><table><thead><tr><th>Field</th><th>Role</th><th class="num">Hours / Unit</th><th class="num">Score Weight</th></tr></thead><tbody id="mappingBody"></tbody></table><div class="note">This section shows exactly how each field participates in the engine, so future additions stay transparent and manageable.</div></div></section>
       </section>
     </div>
+
+    <div class="footer-center">Copyright © 2026 Kyndryl Inc. All rights reserved</div>
   </div>
 
   <script>
-    const assumptions = {
-      base: {
-        Small: { discovery: 24, design: 48, testing: 16 },
-        Medium: { discovery: 44, design: 100, testing: 40 },
-        Large: { discovery: 80, design: 180, testing: 80 }
-      },
-      implementationRates: [
-        { key: 'vnets', label: 'Virtual Network (VNet / VPC)', hours: 20, qty: (i) => i.vnets },
-        { key: 'subnets', label: 'Subnet', hours: 20, qty: (i) => i.vnets * 4 },
-        { key: 'peering', label: 'Network Peering', hours: 20, qty: (i) => Math.max(i.vnets - 1, 0) },
-        { key: 'vpn', label: 'Site-to-Site VPN', hours: 20, qty: (i) => i.vpn },
-        { key: 'connectivity', label: 'Dedicated Cloud Connectivity', hours: 20, qty: (i) => i.connectivity },
-        { key: 'cloudFirewalls', label: 'Cloud Network Firewall', hours: 24, qty: (i) => i.cloudFirewalls },
-        { key: 'firewallHa', label: 'Firewall HA', hours: 12, qty: (i) => i.firewallHa === 'Yes' ? i.cloudFirewalls : 0 },
-        { key: 'transitHubs', label: 'Cloud Transit Hub', hours: 20, qty: (i) => i.transitHubs },
-        { key: 'transitAttachment', label: 'Transit Attachment', hours: 500, qty: (i) => Math.max(i.vnets - 1, 0) },
-        { key: 'crossRegionLinks', label: 'Cross-Region Connectivity', hours: 6, qty: (i) => i.crossRegionLinks },
-        { key: 'securityPolicies', label: 'Security Policies (L3/L4)', hours: 3, qty: (i) => i.vnets * 2 },
-        { key: 'routeTables', label: 'Custom Route Tables', hours: 3, qty: (i) => i.vnets },
-        { key: 'hubSpoke', label: 'Hub-Spoke Deployment', hours: 20, qty: (i) => i.hubSpoke === 'Yes' ? 1 : 0 },
-        { key: 'waf', label: 'Web Application Firewall', hours: 12, qty: (i) => i.waf },
-        { key: 'loadBalancers', label: 'Load Balancer', hours: 8, qty: (i) => i.loadBalancers },
-        { key: 'natGateways', label: 'NAT Gateway', hours: 6, qty: (i) => i.natGateways },
-        { key: 'ddos', label: 'DDoS Protection', hours: 6, qty: (i) => i.ddos === 'Yes' ? 1 : 0 }
-      ],
-      roleSplit: {
-        discovery: { arch: 0.3, sme: 0.7 },
-        design: { arch: 0.7, sme: 0.3 },
-        testing: { arch: 0.3, sme: 0.7 },
-        implementation: { arch: 0.3, sme: 0.7 },
-        hypercare: { arch: 0.3, sme: 0.7 }
-      },
-      hypercarePct: 0.04
+    const STORAGE_KEY = "cloud_effort_dynamic_schema_v1";
+    const defaultSchema = {
+      sizeThresholds: { medium: 7, large: 15 },
+      base: { Small: { discovery: 24, design: 48, testing: 16 }, Medium: { discovery: 44, design: 100, testing: 40 }, Large: { discovery: 80, design: 180, testing: 80 } },
+      roleSplit: { discovery: { arch: 0.3, sme: 0.7 }, design: { arch: 0.7, sme: 0.3 }, testing: { arch: 0.3, sme: 0.7 }, implementation: { arch: 0.3, sme: 0.7 }, hypercare: { arch: 0.3, sme: 0.7 } },
+      upliftRules: { environmentPerExtra: 0.2, automation: 0.15, multiCloudPerExtra: 0.3 },
+      hypercarePct: 0.04,
+      fields: [
+        { key: 'vnets', label: 'Number of Virtual Networks (VNet / VPC)', type: 'number', section: 'Core Topology', default: 4, role: 'implementation', rate: 20, scoreWeight: 1 },
+        { key: 'regions', label: 'Number of Regions', type: 'number', section: 'Core Topology', default: 2, role: 'size_score', scoreWeight: 2 },
+        { key: 'cloudFirewalls', label: 'Number of Cloud Network Firewalls', type: 'number', section: 'Core Topology', default: 2, role: 'implementation', rate: 24, scoreWeight: 2 },
+        { key: 'connectivity', label: 'Number of Dedicated Cloud Connectivity', type: 'number', section: 'Core Topology', default: 1, role: 'implementation', rate: 20 },
+        { key: 'transitHubs', label: 'Number of Cloud Transit / Network Hubs', type: 'number', section: 'Core Topology', default: 1, role: 'implementation', rate: 20, scoreWeight: 2 },
+        { key: 'crossRegionLinks', label: 'Number of Cross-Region Connectivity Links', type: 'number', section: 'Core Topology', default: 3, role: 'implementation', rate: 6 },
+        { key: 'environments', label: 'Number of Environments', type: 'number', section: 'Core Topology', default: 3, role: 'uplift_env' },
+        { key: 'cloudPlatforms', label: 'Number of Cloud Platforms', type: 'number', section: 'Core Topology', default: 2, role: 'uplift_multi' },
+        { key: 'waf', label: 'Number of Web Application Firewalls (WAF)', type: 'number', section: 'Security & Connectivity Services', default: 1, role: 'implementation', rate: 12 },
+        { key: 'vpn', label: 'Number of Site-to-Site VPN Connections', type: 'number', section: 'Security & Connectivity Services', default: 2, role: 'implementation', rate: 20 },
+        { key: 'firewallHa', label: 'Firewall High Availability Required', type: 'select', options: ['No', 'Yes'], section: 'Security & Connectivity Services', default: 'No', role: 'none' },
+        { key: 'ddos', label: 'DDoS Protection Service Enabled', type: 'select', options: ['No', 'Yes'], section: 'Security & Connectivity Services', default: 'Yes', role: 'none' },
+        { key: 'hubSpoke', label: 'Hub-and-Spoke Architecture Deployment Required', type: 'select', options: ['No', 'Yes'], section: 'Security & Connectivity Services', default: 'No', role: 'none' },
+        { key: 'automation', label: 'Automation / IaC Required', type: 'select', options: ['No', 'Yes'], section: 'Security & Connectivity Services', default: 'No', role: 'uplift_automation' },
+        { key: 'loadBalancers', label: 'Number of Layer 4 Load Balancers', type: 'number', section: 'Application Edge Services', default: 2, role: 'implementation', rate: 8 },
+        { key: 'natGateways', label: 'Number of Outbound NAT Gateways', type: 'number', section: 'Application Edge Services', default: 1, role: 'implementation', rate: 6 },
+        { key: 'deploymentModel', label: 'Deployment Model', type: 'select', options: ['Single-Cloud', 'Multi-Cloud'], section: 'Application Edge Services', default: 'Multi-Cloud', role: 'none' }
+      ]
     };
 
-    const numericIds = [
-      'vnets', 'regions', 'cloudFirewalls', 'connectivity', 'transitHubs', 'waf', 'vpn',
-      'loadBalancers', 'natGateways', 'crossRegionLinks', 'environments', 'cloudPlatforms'
-    ];
-
-    const allInputs = numericIds.concat(['firewallHa', 'ddos', 'hubSpoke', 'automation', 'deploymentModel']);
-
-    const sampleValues = {
-      vnets: 4,
-      regions: 2,
-      cloudFirewalls: 2,
-      connectivity: 1,
-      transitHubs: 1,
-      waf: 1,
-      vpn: 4,
-      firewallHa: 'Yes',
-      loadBalancers: 2,
-      natGateways: 2,
-      ddos: 'Yes',
-      crossRegionLinks: 2,
-      hubSpoke: 'Yes',
-      automation: 'Yes',
-      environments: 3,
-      deploymentModel: 'Multi-Cloud',
-      cloudPlatforms: 2
-    };
-
-    function fmt(value) {
-      const num = Number(value || 0);
-      return num.toFixed(2).replace(/\.00$/, '').replace(/(\.\d*[1-9])0$/, '$1');
-    }
-
-    function fmtPct(value) {
-      return (Number(value || 0) * 100).toFixed(0) + '%';
-    }
-
-    function escapeXml(value) {
-      return String(value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&apos;');
-    }
-
-    function getIntegerValue(id) {
-      const field = document.getElementById(id);
-      const raw = field.value.trim();
-      if (raw === '') return 0;
-      return Number(raw);
-    }
-
-    function readInputs() {
-      return {
-        vnets: getIntegerValue('vnets'),
-        regions: getIntegerValue('regions'),
-        cloudFirewalls: getIntegerValue('cloudFirewalls'),
-        connectivity: getIntegerValue('connectivity'),
-        transitHubs: getIntegerValue('transitHubs'),
-        waf: getIntegerValue('waf'),
-        vpn: getIntegerValue('vpn'),
-        firewallHa: document.getElementById('firewallHa').value,
-        loadBalancers: getIntegerValue('loadBalancers'),
-        natGateways: getIntegerValue('natGateways'),
-        ddos: document.getElementById('ddos').value,
-        crossRegionLinks: getIntegerValue('crossRegionLinks'),
-        hubSpoke: document.getElementById('hubSpoke').value,
-        automation: document.getElementById('automation').value,
-        environments: getIntegerValue('environments'),
-        deploymentModel: document.getElementById('deploymentModel').value,
-        cloudPlatforms: getIntegerValue('cloudPlatforms')
-      };
-    }
-
-    function validate(inputs) {
-      const errors = [];
-      numericIds.forEach((id) => document.getElementById(id).classList.remove('invalid'));
-
-      numericIds.forEach((id) => {
-        const field = document.getElementById(id);
-        const raw = field.value.trim();
-        if (raw === '') return;
-        const num = Number(raw);
-        const min = (id === 'environments' || id === 'cloudPlatforms') ? 1 : 0;
-        if (!Number.isFinite(num) || !Number.isInteger(num) || num < min) {
-          field.classList.add('invalid');
-          if (id === 'environments' || id === 'cloudPlatforms') {
-            errors.push('Environments and Cloud Platforms must be whole numbers of 1 or greater.');
-          } else {
-            errors.push('All quantity inputs must be whole numbers of 0 or greater.');
-          }
-        }
+    function clone(x){ return JSON.parse(JSON.stringify(x)); }
+    function loadSchema(){ const raw = localStorage.getItem(STORAGE_KEY); if (!raw) return clone(defaultSchema); try { return JSON.parse(raw); } catch { return clone(defaultSchema); } }
+    function saveSchema(schema){ localStorage.setItem(STORAGE_KEY, JSON.stringify(schema)); }
+    let schema = loadSchema();
+    function fmt(v){ const n = Number(v || 0); return n.toFixed(2).replace(/\.00$/,'').replace(/(\.\d*[1-9])0$/,'$1'); }
+    function fmtPct(v){ return Math.round(Number(v || 0) * 100) + '%'; }
+    function groups(){ const out = {}; schema.fields.forEach(f => { if (!out[f.section]) out[f.section] = []; out[f.section].push(f); }); return out; }
+    function renderInputs(){
+      const host = document.getElementById('dynamicInputs');
+      const grouped = groups();
+      host.innerHTML = Object.entries(grouped).map(([section, fields]) => `
+        <div style="margin-bottom:18px;">
+          <div class="section-label">${section}</div>
+          <div class="input-grid">
+            ${fields.map(field => `<div class="field"><label for="${field.key}">${field.label}</label>${field.type === 'select' ? `<select id="${field.key}">${(field.options || []).map(opt => `<option value="${opt}">${opt}</option>`).join('')}</select>` : `<input id="${field.key}" type="number" min="${field.key === 'environments' || field.key === 'cloudPlatforms' ? 1 : 0}" step="1" value="${field.default ?? 0}" />`}</div>`).join('')}
+          </div>
+        </div>`).join('');
+      schema.fields.forEach(field => {
+        const el = document.getElementById(field.key);
+        if (!el) return;
+        el.value = field.default ?? (field.type === 'select' ? (field.options?.[0] || '') : 0);
+        el.addEventListener('input', render);
+        el.addEventListener('change', render);
       });
-
-      if (inputs.deploymentModel === 'Single-Cloud' && inputs.cloudPlatforms !== 1) {
-        document.getElementById('cloudPlatforms').classList.add('invalid');
-        errors.push('Single-Cloud deployment requires Number of Cloud Platforms = 1.');
-      }
-
-      if (inputs.deploymentModel === 'Multi-Cloud' && inputs.cloudPlatforms < 2) {
-        document.getElementById('cloudPlatforms').classList.add('invalid');
-        errors.push('Multi-Cloud deployment requires Number of Cloud Platforms of at least 2.');
-      }
-
-      return [...new Set(errors)];
+    }
+    function getValue(field){ const el = document.getElementById(field.key); if (!el) return field.default ?? 0; return field.type === 'number' ? Number(el.value || 0) : el.value; }
+    function inputsObject(){ const obj = {}; schema.fields.forEach(f => obj[f.key] = getValue(f)); return obj; }
+    function score(inputs){ let total = 0; schema.fields.forEach(f => { if (typeof f.scoreWeight === 'number') total += Number(inputs[f.key] || 0) * Number(f.scoreWeight || 0); }); return total; }
+    function projectSize(scoreValue){ if (scoreValue >= schema.sizeThresholds.large) return 'Large'; if (scoreValue >= schema.sizeThresholds.medium) return 'Medium'; return 'Small'; }
+    function implementationBreakdown(inputs){
+      const rows = [];
+      schema.fields.forEach(f => { if (f.role === 'implementation') rows.push({ label: f.label, qty: Number(inputs[f.key] || 0), hours: Number(f.rate || 0), total: Number(inputs[f.key] || 0) * Number(f.rate || 0) }); });
+      const vnets = Number(inputs.vnets || 0), firewallCount = Number(inputs.cloudFirewalls || 0);
+      rows.push({ label: 'Subnet', qty: vnets * 4, hours: 20, total: vnets * 4 * 20 });
+      rows.push({ label: 'Network Peering', qty: Math.max(vnets - 1, 0), hours: 20, total: Math.max(vnets - 1, 0) * 20 });
+      rows.push({ label: 'Firewall HA', qty: inputs.firewallHa === 'Yes' ? firewallCount : 0, hours: 12, total: (inputs.firewallHa === 'Yes' ? firewallCount : 0) * 12 });
+      rows.push({ label: 'Transit Attachment', qty: Math.max(vnets - 1, 0), hours: 500, total: Math.max(vnets - 1, 0) * 500 });
+      rows.push({ label: 'Security Policies (L3/L4)', qty: vnets * 2, hours: 3, total: vnets * 2 * 3 });
+      rows.push({ label: 'Custom Route Tables', qty: vnets, hours: 3, total: vnets * 3 });
+      rows.push({ label: 'Hub-Spoke Deployment', qty: inputs.hubSpoke === 'Yes' ? 1 : 0, hours: 20, total: (inputs.hubSpoke === 'Yes' ? 1 : 0) * 20 });
+      rows.push({ label: 'DDoS Protection', qty: inputs.ddos === 'Yes' ? 1 : 0, hours: 6, total: (inputs.ddos === 'Yes' ? 1 : 0) * 6 });
+      return rows.filter(r => r.qty !== 0 || r.label === 'Hub-Spoke Deployment' || r.label === 'DDoS Protection');
     }
 
-    function getProjectSize(inputs) {
-      const score = inputs.vnets + (inputs.regions * 2) + (inputs.cloudFirewalls * 2) + (inputs.transitHubs * 2);
-      if (score >= 15) return { size: 'Large', score };
-      if (score >= 7) return { size: 'Medium', score };
-      return { size: 'Small', score };
-    }
-
-    function calculate(inputs) {
-      const sizeInfo = getProjectSize(inputs);
-      const base = assumptions.base[sizeInfo.size];
-      const environmentUplift = inputs.environments > 1 ? (inputs.environments - 1) * 0.2 : 0;
-      const automationUplift = inputs.automation === 'Yes' ? 0.15 : 0;
-      const multiCloudUplift = inputs.cloudPlatforms > 1 ? (inputs.cloudPlatforms - 1) * 0.3 : 0;
+    function calculate(inputs){
+      const scoreValue = score(inputs), size = projectSize(scoreValue), base = schema.base[size];
+      const envCount = Number(inputs.environments || 1), platformCount = Number(inputs.cloudPlatforms || 1);
+      const environmentUplift = Math.max(envCount - 1, 0) * schema.upliftRules.environmentPerExtra;
+      const automationUplift = String(inputs.automation || 'No') === 'Yes' ? schema.upliftRules.automation : 0;
+      const multiCloudUplift = Math.max(platformCount - 1, 0) * schema.upliftRules.multiCloudPerExtra;
       const totalUplift = environmentUplift + automationUplift + multiCloudUplift;
-
-      const discovery = base.discovery * (1 + totalUplift);
-      const design = base.design * (1 + totalUplift);
-      const testing = base.testing * (1 + totalUplift);
-
-      const breakdown = assumptions.implementationRates.map((item) => {
-        const qty = item.qty(inputs);
-        const total = qty * item.hours;
-        return { label: item.label, qty, hours: item.hours, total };
-      });
-
-      const implementation = breakdown.reduce((sum, row) => sum + row.total, 0);
-      const hypercare = implementation * assumptions.hypercarePct;
-
-      const phases = { discovery, design, testing, implementation, hypercare };
-      const architectTotal =
-        (discovery * assumptions.roleSplit.discovery.arch) +
-        (design * assumptions.roleSplit.design.arch) +
-        (testing * assumptions.roleSplit.testing.arch) +
-        (implementation * assumptions.roleSplit.implementation.arch) +
-        (hypercare * assumptions.roleSplit.hypercare.arch);
-      const smeTotal =
-        (discovery * assumptions.roleSplit.discovery.sme) +
-        (design * assumptions.roleSplit.design.sme) +
-        (testing * assumptions.roleSplit.testing.sme) +
-        (implementation * assumptions.roleSplit.implementation.sme) +
-        (hypercare * assumptions.roleSplit.hypercare.sme);
-
-      return {
-        inputs,
-        sizeInfo,
-        uplifts: { environmentUplift, automationUplift, multiCloudUplift, totalUplift },
-        breakdown,
-        phases,
-        implementation,
-        hypercare,
-        totalEngineering: discovery + design + testing + implementation + hypercare,
-        architectTotal,
-        smeTotal
-      };
+      const discovery = base.discovery * (1 + totalUplift), design = base.design * (1 + totalUplift), testing = base.testing * (1 + totalUplift);
+      const breakdown = implementationBreakdown(inputs), implementation = breakdown.reduce((s, r) => s + r.total, 0), hypercare = implementation * schema.hypercarePct;
+      const architectTotal = discovery * schema.roleSplit.discovery.arch + design * schema.roleSplit.design.arch + testing * schema.roleSplit.testing.arch + implementation * schema.roleSplit.implementation.arch + hypercare * schema.roleSplit.hypercare.arch;
+      const smeTotal = discovery * schema.roleSplit.discovery.sme + design * schema.roleSplit.design.sme + testing * schema.roleSplit.testing.sme + implementation * schema.roleSplit.implementation.sme + hypercare * schema.roleSplit.hypercare.sme;
+      return { size, scoreValue, uplifts: { environmentUplift, automationUplift, multiCloudUplift, totalUplift }, discovery, design, testing, implementation, hypercare, architectTotal, smeTotal, breakdown, totalEngineering: discovery + design + testing + implementation + hypercare };
     }
-
-    function setPair(prefix, total, archPct, smePct) {
-      document.getElementById(prefix + 'Hours').textContent = fmt(total);
-      document.getElementById(prefix + 'Arch').textContent = fmt(total * archPct);
-      document.getElementById(prefix + 'Sme').textContent = fmt(total * smePct);
+    function renderMapping(){ document.getElementById('mappingBody').innerHTML = schema.fields.map(f => `<tr><td>${f.label}</td><td>${f.role}</td><td class="num">${f.role === 'implementation' ? fmt(f.rate || 0) : '-'}</td><td class="num">${typeof f.scoreWeight === 'number' ? fmt(f.scoreWeight) : '-'}</td></tr>`).join(''); }
+    function renderBreakdown(rows, total){ document.getElementById('breakdownBody').innerHTML = rows.map(r => `<tr><td>${r.label}</td><td class="num">${fmt(r.qty)}</td><td class="num">${fmt(r.hours)}</td><td class="num">${fmt(r.total)}</td></tr>`).join('') + `<tr><td><strong>Implementation Total</strong></td><td class="num"></td><td class="num"></td><td class="num"><strong>${fmt(total)}</strong></td></tr>`; }
+    function render(){
+      const inputs = inputsObject(), r = calculate(inputs);
+      document.getElementById('projectSize').textContent = r.size;
+      document.getElementById('totalUplift').textContent = fmtPct(r.uplifts.totalUplift);
+      document.getElementById('implementationTotal').textContent = fmt(r.implementation);
+      document.getElementById('totalEngineering').textContent = fmt(r.totalEngineering);
+      document.getElementById('phaseSummaryBody').innerHTML = `<tr><td>Discovery</td><td class="num">${fmt(r.discovery)}</td><td class="num">0.3</td><td class="num">${fmt(r.discovery * 0.3)}</td><td class="num">0.7</td><td class="num">${fmt(r.discovery * 0.7)}</td></tr><tr><td>Design</td><td class="num">${fmt(r.design)}</td><td class="num">0.7</td><td class="num">${fmt(r.design * 0.7)}</td><td class="num">0.3</td><td class="num">${fmt(r.design * 0.3)}</td></tr><tr><td>Testing</td><td class="num">${fmt(r.testing)}</td><td class="num">0.3</td><td class="num">${fmt(r.testing * 0.3)}</td><td class="num">0.7</td><td class="num">${fmt(r.testing * 0.7)}</td></tr><tr><td>Implementation</td><td class="num">${fmt(r.implementation)}</td><td class="num">0.3</td><td class="num">${fmt(r.implementation * 0.3)}</td><td class="num">0.7</td><td class="num">${fmt(r.implementation * 0.7)}</td></tr><tr><td>Hypercare</td><td class="num">${fmt(r.hypercare)}</td><td class="num">0.3</td><td class="num">${fmt(r.hypercare * 0.3)}</td><td class="num">0.7</td><td class="num">${fmt(r.hypercare * 0.7)}</td></tr><tr><td><strong>Total Architect Hours</strong></td><td class="num" colspan="5"><strong>${fmt(r.architectTotal)}</strong></td></tr><tr><td><strong>Total SME Hours</strong></td><td class="num" colspan="5"><strong>${fmt(r.smeTotal)}</strong></td></tr>`;
+      renderBreakdown(r.breakdown, r.implementation); renderMapping();
     }
-
-    function renderBreakdown(result) {
-      const body = document.getElementById('implementationBody');
-      body.innerHTML = '';
-
-      result.breakdown.forEach((row) => {
-        const tr = document.createElement('tr');
-        tr.innerHTML =
-          '<td>' + escapeXml(row.label) + '</td>' +
-          '<td class="right">' + fmt(row.qty) + '</td>' +
-          '<td class="right">' + fmt(row.hours) + '</td>' +
-          '<td class="right">' + fmt(row.total) + '</td>';
-        body.appendChild(tr);
-      });
-
-      const totalRow = document.createElement('tr');
-      totalRow.className = 'total-row';
-      totalRow.innerHTML =
-        '<td>Implementation Total</td>' +
-        '<td class="right"></td>' +
-        '<td class="right"></td>' +
-        '<td class="right">' + fmt(result.implementation) + '</td>';
-      body.appendChild(totalRow);
+    function resetInputs(){ schema.fields.forEach(f => { const el = document.getElementById(f.key); if (!el) return; el.value = f.default ?? (f.type === 'select' ? (f.options?.[0] || '') : 0); }); render(); }
+    function slugify(s){ return String(s || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, ''); }
+    function addField(){
+      const label = document.getElementById('newLabel').value.trim(); let key = document.getElementById('newKey').value.trim();
+      const section = document.getElementById('newSection').value, type = document.getElementById('newType').value, role = document.getElementById('newRole').value;
+      const defaultValue = document.getElementById('newDefault').value.trim(), options = document.getElementById('newOptions').value.trim();
+      const rate = Number(document.getElementById('newRate').value || 0), scoreWeight = Number(document.getElementById('newScoreWeight').value || 0);
+      if (!label) return alert('Please enter a Field Label.');
+      if (!key) key = slugify(label);
+      if (schema.fields.some(f => f.key === key)) return alert('Field Key already exists. Please choose a unique key.');
+      const field = { key, label, type, section, default: type === 'number' ? Number(defaultValue || 0) : (defaultValue || ((options.split(',')[0] || '').trim())), role };
+      if (type === 'select') { field.options = (options || 'Yes,No').split(',').map(s => s.trim()).filter(Boolean); if (!field.options.length) field.options = ['Yes', 'No']; }
+      if (role === 'implementation') field.rate = rate;
+      if (role === 'size_score') field.scoreWeight = scoreWeight;
+      schema.fields.push(field); saveSchema(schema); renderInputs(); render();
+      ['newLabel','newKey','newDefault','newOptions','newRate','newScoreWeight'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('newRole').value = 'none'; document.getElementById('newType').value = 'number'; document.getElementById('newSection').value = 'Core Topology';
     }
-
-    function renderResult(result) {
-      document.getElementById('projectSize').textContent = result.sizeInfo.size;
-      document.getElementById('totalUpliftCard').textContent = fmtPct(result.uplifts.totalUplift);
-      document.getElementById('implementationTotalCard').textContent = fmt(result.implementation);
-      document.getElementById('totalEngineering').textContent = fmt(result.totalEngineering);
-      document.getElementById('scenarioText').innerHTML =
-        'Deployment: ' + escapeXml(result.inputs.deploymentModel) + '<br />' +
-        'Platforms: ' + fmt(result.inputs.cloudPlatforms) + '<br />' +
-        'Environments: ' + fmt(result.inputs.environments) + '<br />' +
-        'Score: ' + fmt(result.sizeInfo.score);
-
-      setPair('discovery', result.phases.discovery, 0.3, 0.7);
-      setPair('design', result.phases.design, 0.7, 0.3);
-      setPair('testing', result.phases.testing, 0.3, 0.7);
-      setPair('implementation', result.phases.implementation, 0.3, 0.7);
-      setPair('hypercare', result.phases.hypercare, 0.3, 0.7);
-      document.getElementById('totalArchitectHours').textContent = fmt(result.architectTotal);
-      document.getElementById('totalSmeHours').textContent = fmt(result.smeTotal);
-      renderBreakdown(result);
+    function exportExcel(){
+      const inputs = inputsObject(), r = calculate(inputs), rows = [];
+      rows.push(['Field','Value']); schema.fields.forEach(f => rows.push([f.label, getValue(f)])); rows.push([]); rows.push(['Phase','Total Hours','Architect %','Architect Hours','SME %','SME Hours']);
+      rows.push(['Discovery', r.discovery, 0.3, r.discovery * 0.3, 0.7, r.discovery * 0.7]); rows.push(['Design', r.design, 0.7, r.design * 0.7, 0.3, r.design * 0.3]); rows.push(['Testing', r.testing, 0.3, r.testing * 0.3, 0.7, r.testing * 0.7]); rows.push(['Implementation', r.implementation, 0.3, r.implementation * 0.3, 0.7, r.implementation * 0.7]); rows.push(['Hypercare', r.hypercare, 0.3, r.hypercare * 0.3, 0.7, r.hypercare * 0.7]); rows.push([]); rows.push(['Total Architect Hours', r.architectTotal]); rows.push(['Total SME Hours', r.smeTotal]);
+      const htmlTable = `<table border="1">${rows.map(row => `<tr>${(row.length ? row : ['']).map(cell => `<td>${cell ?? ''}</td>`).join('')}</tr>`).join('')}</table>`;
+      const blob = new Blob([htmlTable], {type:'application/vnd.ms-excel'}), url = URL.createObjectURL(blob), a = document.createElement('a');
+      a.href = url; a.download = 'cloud_network_effort_dynamic.xls'; a.click(); URL.revokeObjectURL(url);
     }
-
-    function showMessage(elementId, message) {
-      const el = document.getElementById(elementId);
-      if (!message) {
-        el.style.display = 'none';
-        el.textContent = '';
-        return;
-      }
-      el.style.display = 'block';
-      el.textContent = message;
-    }
-
-    function currentResult() {
-      const inputs = readInputs();
-      const errors = validate(inputs);
-      const exportBtn = document.getElementById('exportExcel');
-      const pdfBtn = document.getElementById('printPdf');
-
-      if (errors.length) {
-        showMessage('validationMsg', errors.join(' '));
-        exportBtn.disabled = true;
-        pdfBtn.disabled = true;
-        return null;
-      }
-
-      showMessage('validationMsg', '');
-      exportBtn.disabled = false;
-      pdfBtn.disabled = false;
-      return calculate(inputs);
-    }
-
-    function update() {
-      const result = currentResult();
-      if (result) renderResult(result);
-    }
-
-    function loadSample() {
-      Object.keys(sampleValues).forEach((key) => {
-        document.getElementById(key).value = sampleValues[key];
-      });
-      showMessage('actionMsg', 'Sample values loaded.');
-      update();
-      setTimeout(() => showMessage('actionMsg', ''), 2200);
-    }
-
-    function resetForm() {
-      numericIds.forEach((id) => {
-        document.getElementById(id).value = (id === 'environments' || id === 'cloudPlatforms') ? 1 : 0;
-      });
-      document.getElementById('firewallHa').value = 'No';
-      document.getElementById('ddos').value = 'No';
-      document.getElementById('hubSpoke').value = 'No';
-      document.getElementById('automation').value = 'No';
-      document.getElementById('deploymentModel').value = 'Single-Cloud';
-      showMessage('actionMsg', 'Form reset.');
-      update();
-      setTimeout(() => showMessage('actionMsg', ''), 1800);
-    }
-
-    function xmlCell(value, type) {
-      if (type === 'Number') {
-        return '<Cell><Data ss:Type="Number">' + value + '</Data></Cell>';
-      }
-      return '<Cell><Data ss:Type="String">' + escapeXml(value) + '</Data></Cell>';
-    }
-
-    function exportExcel() {
-      const result = currentResult();
-      if (!result) return;
-
-      const now = new Date();
-      const timestamp = now.getFullYear() + '-' +
-        String(now.getMonth() + 1).padStart(2, '0') + '-' +
-        String(now.getDate()).padStart(2, '0') + ' ' +
-        String(now.getHours()).padStart(2, '0') + ':' +
-        String(now.getMinutes()).padStart(2, '0');
-
-      const inputRows = [
-        ['Cloud Network Effort Estimator Export'],
-        ['Generated', timestamp],
-        [],
-        ['Project Inputs'],
-        ['Number of Virtual Networks (VNet / VPC)', result.inputs.vnets],
-        ['Number of Regions', result.inputs.regions],
-        ['Number of Cloud Network Firewalls', result.inputs.cloudFirewalls],
-        ['Number of Dedicated Cloud Connectivity', result.inputs.connectivity],
-        ['Number of Cloud Transit / Network Hubs', result.inputs.transitHubs],
-        ['Number of Web Application Firewalls (WAF)', result.inputs.waf],
-        ['Number of Site-to-Site VPN Connections', result.inputs.vpn],
-        ['Firewall High Availability Required', result.inputs.firewallHa],
-        ['Number of Layer 4 Load Balancers', result.inputs.loadBalancers],
-        ['Number of Outbound NAT Gateways', result.inputs.natGateways],
-        ['DDoS Protection Service Enabled', result.inputs.ddos],
-        ['Number of Cross-Region Connectivity Links', result.inputs.crossRegionLinks],
-        ['Hub-and-Spoke Architecture Deployment Required', result.inputs.hubSpoke],
-        ['Automation / IaC Required', result.inputs.automation],
-        ['Number of Environments', result.inputs.environments],
-        ['Deployment Model', result.inputs.deploymentModel],
-        ['Number of Cloud Platforms', result.inputs.cloudPlatforms]
-      ];
-
-      const summaryRows = [
-        ['Effort Estimator Summary'],
-        ['Generated', timestamp],
-        ['Project Size', result.sizeInfo.size],
-        ['Score', result.sizeInfo.score],
-        ['Environment Uplift', result.uplifts.environmentUplift],
-        ['Automation Uplift', result.uplifts.automationUplift],
-        ['Multi-Cloud Uplift', result.uplifts.multiCloudUplift],
-        ['Total Uplift', result.uplifts.totalUplift],
-        ['Total Engineering Effort', result.totalEngineering],
-        [],
-        ['Phase', 'Total Hours', 'Architect %', 'Architect Hours', 'SME %', 'SME Hours'],
-        ['Discovery', result.phases.discovery, 0.3, result.phases.discovery * 0.3, 0.7, result.phases.discovery * 0.7],
-        ['Design', result.phases.design, 0.7, result.phases.design * 0.7, 0.3, result.phases.design * 0.3],
-        ['Testing', result.phases.testing, 0.3, result.phases.testing * 0.3, 0.7, result.phases.testing * 0.7],
-        ['Implementation', result.phases.implementation, 0.3, result.phases.implementation * 0.3, 0.7, result.phases.implementation * 0.7],
-        ['Hypercare', result.phases.hypercare, 0.3, result.phases.hypercare * 0.3, 0.7, result.phases.hypercare * 0.7],
-        [],
-        ['Total Architect Hours', result.architectTotal],
-        ['Total SME Hours', result.smeTotal]
-      ];
-
-      const breakdownRows = [
-        ['Implementation Breakdown'],
-        ['Component', 'Qty', 'Hours per Unit', 'Total Hours']
-      ].concat(result.breakdown.map((row) => [row.label, row.qty, row.hours, row.total])).concat([
-        [],
-        ['Implementation Total', '', '', result.implementation],
-        ['Hypercare (4%)', '', '', result.hypercare]
-      ]);
-
-      function sheetXml(name, rows) {
-        const xmlRows = rows.map((row) => {
-          if (!row || row.length === 0) return '<Row></Row>';
-          const cells = row.map((cell) => {
-            const type = typeof cell === 'number' ? 'Number' : 'String';
-            return xmlCell(cell, type);
-          }).join('');
-          return '<Row>' + cells + '</Row>';
-        }).join('');
-        return '<Worksheet ss:Name="' + escapeXml(name) + '"><Table>' + xmlRows + '</Table></Worksheet>';
-      }
-
-      const workbookXml =
-        '<?xml version="1.0"?>' +
-        '<?mso-application progid="Excel.Sheet"?>' +
-        '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" ' +
-        'xmlns:o="urn:schemas-microsoft-com:office:office" ' +
-        'xmlns:x="urn:schemas-microsoft-com:office:excel" ' +
-        'xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet" ' +
-        'xmlns:html="http://www.w3.org/TR/REC-html40">' +
-        sheetXml('Project Inputs', inputRows) +
-        sheetXml('Effort Summary', summaryRows) +
-        sheetXml('Implementation', breakdownRows) +
-        '</Workbook>';
-
-      const blob = new Blob([workbookXml], { type: 'application/vnd.ms-excel' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'cloud_network_effort_export.xls';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-
-      showMessage('actionMsg', 'Excel export downloaded.');
-      setTimeout(() => showMessage('actionMsg', ''), 2200);
-    }
-
-    function printPdf() {
-      const result = currentResult();
-      if (!result) return;
-      showMessage('actionMsg', 'Print dialog opened. Choose "Save as PDF" if needed.');
-      setTimeout(() => showMessage('actionMsg', ''), 2600);
-      window.print();
-    }
-
-    allInputs.forEach((id) => {
-      document.getElementById(id).addEventListener('input', update);
-      document.getElementById(id).addEventListener('change', update);
-    });
-
-    document.getElementById('loadSample').addEventListener('click', loadSample);
-    document.getElementById('resetForm').addEventListener('click', resetForm);
+    document.getElementById('loadSample').addEventListener('click', resetInputs);
+    document.getElementById('resetInputs').addEventListener('click', () => { schema.fields.forEach(f => { const el = document.getElementById(f.key); if (!el) return; el.value = f.type === 'select' ? (f.options?.[0] || '') : (f.key === 'environments' || f.key === 'cloudPlatforms' ? 1 : 0); }); render(); });
     document.getElementById('exportExcel').addEventListener('click', exportExcel);
-    document.getElementById('printPdf').addEventListener('click', printPdf);
-
-    update();
+    document.getElementById('printPdf').addEventListener('click', () => window.print());
+    document.getElementById('openBuilder').addEventListener('click', () => { const panel = document.getElementById('builderPanel'); panel.style.display = panel.style.display === 'none' ? 'block' : 'none'; });
+    document.getElementById('addFieldBtn').addEventListener('click', addField);
+    document.getElementById('saveSchemaBtn').addEventListener('click', () => { schema.fields.forEach(f => { const el = document.getElementById(f.key); if (el) f.default = f.type === 'number' ? Number(el.value || 0) : el.value; }); saveSchema(schema); alert('Customization saved in this browser.'); });
+    document.getElementById('restoreDefaultsBtn').addEventListener('click', () => { if (!confirm('Restore original default schema?')) return; localStorage.removeItem(STORAGE_KEY); schema = clone(defaultSchema); renderInputs(); render(); });
+    renderInputs(); render();
   </script>
 </body>
 </html>
