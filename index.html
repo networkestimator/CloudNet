@@ -39,9 +39,9 @@
     input:focus,select:focus{outline:none;border-color:#ff7d6d;box-shadow:0 0 0 3px rgba(255,69,46,.12)}
     input.invalid,select.invalid{border-color:#d92d20;background:#fff5f4}
     .summary-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
-    .summary-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 14px 12px;box-shadow:var(--shadow);min-height:84px}
+    .summary-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 14px 12px;box-shadow:var(--shadow);min-height:104px;display:flex;flex-direction:column}
     .summary-card .label{display:block;font-size:12px;line-height:1.35;font-weight:800;text-transform:uppercase;color:#000;margin-bottom:6px}
-    .summary-card .value{font-size:20px;font-weight:900;line-height:1.1;color:var(--brand);font-family:"Segoe UI Black","Arial Black",sans-serif}
+    .summary-card .value{font-size:20px;font-weight:900;line-height:1.1;color:var(--brand);font-family:"Segoe UI Black","Arial Black",sans-serif;margin-top:auto}
     table{width:100%;border-collapse:collapse;font-size:14px}
     th,td{border:1px solid #c6d0df;padding:9px 10px;text-align:left;vertical-align:middle}
     th{background:#f2f6fb;font-weight:800}
@@ -89,9 +89,9 @@
           <div class="summary-card"><span class="label">Project Size</span><span class="value" id="projectSize">Small</span></div>
           <div class="summary-card"><span class="label">Project Score</span><span class="value" id="projectScore">0</span></div>
           <div class="summary-card"><span class="label">Total Uplift</span><span class="value" id="totalUplift">0%</span></div>
-          <div class="summary-card"><span class="label">Implementation</span><span class="value" id="implementationTotal">0</span></div>
-          <div class="summary-card"><span class="label">Total Engineering</span><span class="value" id="totalEngineering">0</span></div>
-          <div class="summary-card"><span class="label">Network Admin</span><span class="value" id="networkAdminTotal">0</span></div>
+          <div class="summary-card"><span class="label">Implementation Hours</span><span class="value" id="implementationTotal">0</span></div>
+          <div class="summary-card"><span class="label">Total Engineering Hours</span><span class="value" id="totalEngineering">0</span></div>
+          <div class="summary-card"><span class="label">Network Admin Hours</span><span class="value" id="networkAdminTotal">0</span></div>
         </div>
 
         <section class="panel">
